@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>All Documents | HR - Smart Document Locker</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark:       #0a0f1e;
+            --bg-panel:      #0f1729;
+            --bg-card:       #131d35;
+            --bg-row-hover:  #172040;
+            --border:        rgba(255,255,255,0.07);
+            --accent-teal:   #00d4c8;
+            --accent-blue:   #4f8ef7;
+            --accent-purple: #b06ef3;
+            --accent-amber:  #f59e0b;
+            --text-primary:  #e8edf8;
+            --text-muted:    #6b7fa3;
+            --text-dim:      #3d4f72;
+            --success:       #10d48e;
+            --warning:       #f59e0b;
+            --danger:        #f05252;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-dark);
+            min-height: 100vh;
+            color: var(--text-primary);
+        }
+
+        /* ── Layout ── */
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ── Main ── */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Topbar ── */
+        .topbar {
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+            padding: 0.875rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky; top: 0; z-index: 50;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .breadcrumb-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .breadcrumb-nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .breadcrumb-nav a:hover { color: var(--accent-teal); }
+        .breadcrumb-nav .sep { color: var(--text-dim); }
+        .breadcrumb-nav .current { color: var(--accent-teal); font-weight: 600; }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .topbar-date {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.6rem;
+            padding: 0.4rem 0.85rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .notif-btn {
+            width: 36px; height: 36px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.6rem;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-muted);
+            cursor: pointer;
+            position: relative;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .notif-btn:hover { border-color: var(--accent-teal); color: var(--accent-teal); }
+
+        .notif-dot {
+            position: absolute;
+            top: 6px; right: 6px;
+            width: 7px; height: 7px;
+            background: var(--accent-teal);
+            border-radius: 50%;
+            border: 2px solid var(--bg-panel);
+        }
+
+        .user-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 2rem;
+            padding: 0.3rem 0.8rem 0.3rem 0.4rem;
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 30px; height: 30px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .user-info .name {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.2;
+        }
+
+        .user-info .role {
+            font-size: 0.7rem;
+            color: var(--accent-teal);
+        }
+
+        /* ── Content ── */
+        .content {
+            padding: 2rem;
+            flex: 1;
+        }
+
+        /* ── Page Title ── */
+        .page-title-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 1.75rem;
+        }
+
+        .page-title h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 0.25rem;
+        }
+
+        .page-title h1 i { color: var(--accent-teal); }
+
+        .page-title p {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        /* ── Stats Grid ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.25rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.3s, transform 0.3s;
+        }
+
+        .stat-card:hover {
+            border-color: rgba(0, 212, 200, 0.25);
+            transform: translateY(-3px);
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%; height: 2px;
+            background: var(--accent-color, var(--accent-teal));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .stat-card:hover::after { opacity: 1; }
+
+        .stat-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .stat-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .stat-icon {
+            width: 38px; height: 38px;
+            border-radius: 0.6rem;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            font-family: 'Space Mono', monospace;
+            color: var(--text-primary);
+            line-height: 1;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .stat-sub .up { color: var(--success); }
+        .stat-sub .down { color: var(--danger); }
+
+        /* ── Search Bar ── */
+        .search-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.125rem 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 0.875rem;
+            align-items: center;
+        }
+
+        .search-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-dim);
+            font-size: 1rem;
+            pointer-events: none;
+        }
+
+        .search-wrapper input {
+            width: 100%;
+            padding: 0.7rem 1rem 0.7rem 2.75rem;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 0.6rem;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .search-wrapper input::placeholder { color: var(--text-dim); }
+
+        .search-wrapper input:focus {
+            outline: none;
+            border-color: var(--accent-teal);
+            box-shadow: 0 0 0 3px rgba(0, 212, 200, 0.08);
+            background: var(--bg-dark);
+        }
+
+        .btn-search {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.7rem 1.25rem;
+            background: var(--accent-teal);
+            color: #0a0f1e;
+            border: none;
+            border-radius: 0.6rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-search:hover {
+            background: #00bfb4;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(0,212,200,0.3);
+        }
+
+        .btn-reset {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.7rem 1.25rem;
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            border-radius: 0.6rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-reset:hover {
+            border-color: var(--text-muted);
+            color: var(--text-primary);
+        }
+
+        /* ── Table ── */
+       /* ───────── TABLE WHITE BACKGROUND FIX ───────── */
+
+.table-container{
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.table-header{
+    padding: 1.1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: transparent !important;
+}
+
+.table-header h5{
+    margin: 0;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.table-header h5 i{
+    color: var(--accent-teal);
+}
+
+.doc-count{
+    background: rgba(0,212,200,0.1);
+    color: var(--accent-teal);
+    border: 1px solid rgba(0,212,200,0.2);
+    padding: 0.25rem 0.75rem;
+    border-radius: 2rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-family: 'Space Mono', monospace;
+}
+
+.table-responsive{
+    overflow-x: auto;
+    background: transparent !important;
+}
+
+/* Bootstrap Table Override */
+table,
+.table{
+    width: 100%;
+    margin: 0 !important;
+    border-collapse: collapse;
+
+    --bs-table-bg: transparent !important;
+    --bs-table-striped-bg: transparent !important;
+    --bs-table-hover-bg: transparent !important;
+    --bs-table-color: var(--text-primary) !important;
+
+    background: transparent !important;
+    color: var(--text-primary) !important;
+}
+
+/* Header */
+.table thead{
+    background: var(--bg-panel) !important;
+}
+
+.table thead th{
+    background: var(--bg-panel) !important;
+    padding: 0.875rem 1.25rem;
+
+    font-weight: 600;
+    font-size: 0.75rem;
+
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+
+    color: var(--text-dim) !important;
+
+    border: none !important;
+    border-bottom: 1px solid var(--border) !important;
+
+    white-space: nowrap;
+}
+
+/* Body */
+.table tbody tr{
+    background: transparent !important;
+}
+
+.table tbody td{
+    padding: 1rem 1.25rem;
+    vertical-align: middle;
+
+    border: none !important;
+    border-bottom: 1px solid rgba(255,255,255,0.04) !important;
+
+    font-size: 0.875rem;
+    color: var(--text-primary) !important;
+
+    background: transparent !important;
+}
+
+/* Hover */
+.table tbody tr:hover td{
+    background: var(--bg-row-hover) !important;
+}
+
+/* Last Row */
+.table tbody tr:last-child td{
+    border-bottom: none !important;
+}
+
+.emp-name{
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.doc-title{
+    color: var(--text-muted);
+}
+        /* ── Badges ── */
+        .badge {
+            padding: 0.3rem 0.7rem;
+            border-radius: 2rem;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .badge-pending {
+            background: rgba(245,158,11,0.12);
+            color: var(--warning);
+            border: 1px solid rgba(245,158,11,0.25);
+        }
+
+        .badge-verified {
+            background: rgba(16,212,142,0.12);
+            color: var(--success);
+            border: 1px solid rgba(16,212,142,0.25);
+        }
+
+        .badge-rejected {
+            background: rgba(240,82,82,0.12);
+            color: var(--danger);
+            border: 1px solid rgba(240,82,82,0.25);
+        }
+
+        /* ── Action Buttons ── */
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.3rem 0.7rem;
+            border-radius: 0.45rem;
+            font-size: 0.72rem;
+            font-weight: 500;
+            font-family: 'DM Sans', sans-serif;
+            text-decoration: none;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin: 0 0.15rem;
+        }
+
+        .btn-view {
+            background: rgba(79,142,247,0.12);
+            color: var(--accent-blue);
+            border-color: rgba(79,142,247,0.2);
+        }
+
+        .btn-view:hover {
+            background: var(--accent-blue);
+            color: #fff;
+            border-color: var(--accent-blue);
+        }
+
+        .btn-download {
+            background: rgba(0,212,200,0.1);
+            color: var(--accent-teal);
+            border-color: rgba(0,212,200,0.2);
+        }
+
+        .btn-download:hover {
+            background: var(--accent-teal);
+            color: #0a0f1e;
+            border-color: var(--accent-teal);
+        }
+
+        .btn-verify {
+            background: rgba(16,212,142,0.1);
+            color: var(--success);
+            border-color: rgba(16,212,142,0.2);
+        }
+
+        .btn-verify:hover {
+            background: var(--success);
+            color: #fff;
+            border-color: var(--success);
+        }
+
+        .btn-reject {
+            background: rgba(240,82,82,0.1);
+            color: var(--danger);
+            border-color: rgba(240,82,82,0.2);
+        }
+
+        .btn-reject:hover {
+            background: var(--danger);
+            color: #fff;
+            border-color: var(--danger);
+        }
+
+        /* ── Empty State ── */
+        .empty-state {
+            padding: 4rem 2rem;
+            text-align: center;
+            color: var(--text-dim);
+        }
+
+        .empty-state i { font-size: 3rem; margin-bottom: 1rem; display: block; }
+        .empty-state h6 { color: var(--text-muted); margin-bottom: 0.25rem; }
+        .empty-state p { font-size: 0.85rem; }
+
+        /* ── Footer ── */
+        .footer-text {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+
+        .footer-text i { color: var(--accent-teal); }
+
+        /* ── Glowing line at top ── */
+        .glow-bar {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-teal), var(--accent-blue), var(--accent-purple), transparent);
+            margin-bottom: 0;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 1100px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .content { padding: 1rem; }
+            .search-form { flex-direction: column; }
+            .table thead { display: none; }
+            .table tbody td {
+                display: block;
+                text-align: right;
+                padding: 0.6rem 1rem;
+                border-bottom: 1px solid rgba(255,255,255,0.04);
+            }
+            .table tbody td::before {
+                content: attr(data-label);
+                float: left;
+                font-weight: 600;
+                font-size: 0.75rem;
+                color: var(--text-dim);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+        }
+
+        /* Entry animation */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .content > * {
+            animation: fadeUp 0.35s ease forwards;
+        }
+
+        .content > *:nth-child(1) { animation-delay: 0.05s; }
+        .content > *:nth-child(2) { animation-delay: 0.1s; }
+        .content > *:nth-child(3) { animation-delay: 0.15s; }
+        .content > *:nth-child(4) { animation-delay: 0.2s; }
+        .content > *:nth-child(5) { animation-delay: 0.25s; }
+    </style>
+</head>
+<body>
+
+<div class="glow-bar"></div>
+
+<div class="layout">
+
+    <!-- ── Main Content ── -->
+    <div class="main">
+
+        <!-- Topbar -->
+        <div class="topbar">
+            <div class="topbar-left">
+                <nav class="breadcrumb-nav">
+                    <a href="{{ url_for('hr_dashboard') }}">HR Dashboard</a>
+                    <span class="sep"><i class="bi bi-chevron-right" style="font-size:0.7rem;"></i></span>
+                    <span class="current">All Documents</span>
+                </nav>
+            </div>
+
+            <div class="topbar-right">
+                <div class="topbar-date">
+                    <i class="bi bi-calendar-event"></i>
+                    <span id="today-date">--</span>
+                </div>
+
+                <div class="notif-btn">
+                    <i class="bi bi-bell"></i>
+                    <span class="notif-dot"></span>
+                </div>
+                <div class="user-pill">
+                    <div class="user-avatar">{{ session.name[0] if session.name else 'HR' }}</div>
+                    <div class="user-info">
+                        <div class="name">{{ session.name if session.name else 'HR Manager' }}</div>
+                        <div class="role">Super Admin</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+
+            <!-- Page Title -->
+            <div class="page-title-row">
+                <div class="page-title">
+                    <h1><i class="bi bi-files"></i> All Documents</h1>
+                    <p>Manage and review all employee documents across the organization</p>
+                </div>
+            </div>
+
+           
+            <!-- Search Bar -->
+            <div class="search-section">
+                <form method="GET" action="{{ url_for('hr_all_documents') }}" class="search-form">
+                    <div class="search-wrapper">
+                        <i class="bi bi-search"></i>
+                        <input type="text"
+                               name="search"
+                               placeholder="Search by employee name, email, or department..."
+                               value="{{ request.args.get('search', '') }}">
+                    </div>
+                    <button type="submit" class="btn-search">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                    <a href="{{ url_for('hr_all_documents') }}" class="btn-reset">
+                        <i class="bi bi-arrow-repeat"></i> Reset
+                    </a>
+                </form>
+            </div>
+
+            <!-- Table -->
+            <div class="table-container">
+                <div class="table-header">
+                    <h5>
+                        <i class="bi bi-file-earmark-text-fill"></i>
+                        Employee Document Library
+                    </h5>
+                    <span class="doc-count">{{ total_docs if total_docs else 0 }} documents</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Employee Name</th>
+                                <th>Document Title</th>
+                                <th>Category</th>
+                                <th>Upload Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if documents %}
+                                {% for doc in documents %}
+                                <tr>
+                                    <td data-label="Employee Name">
+                                        <span class="emp-name">{{ doc[1] if doc[1] else 'N/A' }}</span>
+                                    </td>
+                                    <td data-label="Document Title">
+                                        <span class="doc-title">{{ doc[2] if doc[2] else 'N/A' }}</span>
+                                    </td>
+                                    <td data-label="Category">{{ doc[3] if doc[3] else 'N/A' }}</td>
+                                    <td data-label="Upload Date">
+                                        {{ doc[4].strftime('%d-%m-%Y') if doc[4] else 'N/A' }}
+                                    </td>
+                                    <td data-label="Status">
+                                        {% if doc[5] == 'Pending' %}
+                                            <span class="badge badge-pending"><i class="bi bi-clock me-1"></i>Pending</span>
+                                        {% elif doc[5] == 'Verified' %}
+                                            <span class="badge badge-verified"><i class="bi bi-check-circle me-1"></i>Verified</span>
+                                        {% else %}
+                                            <span class="badge badge-rejected"><i class="bi bi-x-circle me-1"></i>Rejected</span>
+                                        {% endif %}
+                                    </td>
+                                    <td data-label="Actions">
+                                        <a href="{{ url_for('view_document', doc_id=doc[0]) }}" class="btn-action btn-view">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
+                                        <a href="{{ url_for('download', doc_id=doc[0]) }}" class="btn-action btn-download">
+                                            <i class="bi bi-download"></i> Download
+                                        </a>
+                                        {% if doc[5] == 'Pending' %}
+                                            <a href="{{ url_for('verify_document', id=doc[0]) }}" class="btn-action btn-verify">
+                                                <i class="bi bi-check-circle"></i> Verify
+                                            </a>
+                                            <a href="{{ url_for('reject_document', id=doc[0]) }}" class="btn-action btn-reject">
+                                                <i class="bi bi-x-circle"></i> Reject
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="6">
+                                        <div class="empty-state">
+                                            <i class="bi bi-inbox"></i>
+                                            <h6>No documents found</h6>
+                                            <p>Try adjusting your search criteria</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer-text">
+                <i class="bi bi-shield-check"></i> Secured document management &nbsp;·&nbsp; All actions are logged for audit
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Show today's date in topbar
+    const d = new Date();
+    document.getElementById('today-date').textContent = d.toLocaleDateString('en-GB', {
+        day: '2-digit', month: 'short', year: 'numeric'
+    });
+</script>
+</body>
+</html>

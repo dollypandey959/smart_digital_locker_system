@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>HR Analytics | Document Categories - Smart Document Locker</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-primary: #0d1b2e;
+            --bg-secondary: #0f2340;
+            --bg-card: #0f2340;
+            --bg-card-hover: #132a4e;
+            --bg-surface: #1a3358;
+            --border-color: rgba(255,255,255,0.07);
+            --text-primary: #f0f4ff;
+            --text-secondary: #8fafc8;
+            --text-muted: #56789a;
+            --accent-blue: #38bdf8;
+            --accent-cyan: #06b6d4;
+            --accent-purple: #a78bfa;
+            --accent-green: #34d399;
+            --accent-orange: #fb923c;
+            --accent-pink: #f472b6;
+            --gradient-header: linear-gradient(135deg, #0a1628 0%, #0f2340 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            min-height: 100vh;
+            color: var(--text-primary);
+        }
+
+        .hr-main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        /* Header Section */
+        .page-header {
+            background: linear-gradient(135deg, #0a1628 0%, #0f2b45 60%, #0d2240 100%);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(56, 189, 248, 0.12);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.4), 0 0 0 1px rgba(56,189,248,0.05);
+        }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: -60px;
+            right: -60px;
+            width: 260px;
+            height: 260px;
+            background: radial-gradient(circle, rgba(56,189,248,0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .page-header::after {
+            content: '';
+            position: absolute;
+            bottom: -40px;
+            left: 30%;
+            width: 180px;
+            height: 180px;
+            background: radial-gradient(circle, rgba(167,139,250,0.06) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .page-header h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #e8f4ff;
+        }
+
+        .page-header h1 i {
+            color: var(--accent-blue);
+            filter: drop-shadow(0 0 8px rgba(56,189,248,0.5));
+        }
+
+        .page-header p {
+            opacity: 0.6;
+            margin: 0;
+            font-size: 0.9rem;
+            color: #90b4cc;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background: var(--bg-card);
+            border-radius: 1.25rem;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.75rem;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.25);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .breadcrumb-custom {
+            background: transparent;
+            padding: 0;
+            margin: 0;
+        }
+
+        .breadcrumb-custom .breadcrumb-item a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .breadcrumb-custom .breadcrumb-item a:hover {
+            color: var(--accent-blue);
+        }
+
+        .breadcrumb-custom .breadcrumb-item.active {
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        .breadcrumb-custom .breadcrumb-item+.breadcrumb-item::before {
+            color: var(--text-muted);
+        }
+
+        .hr-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .hr-avatar {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, var(--accent-blue), #1e6fa8);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: white;
+            box-shadow: 0 0 0 2px rgba(56,189,248,0.25);
+        }
+
+        .hr-info strong {
+            color: var(--text-primary);
+        }
+
+        .hr-info small {
+            color: var(--text-muted) !important;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: 1.25rem;
+            padding: 1.25rem;
+            transition: all 0.3s;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover::after {
+            transform: scaleX(1);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+            border-color: rgba(56,189,248,0.2);
+            background: var(--bg-card-hover);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .stat-icon.blue  { background: rgba(56,189,248,0.12);  color: var(--accent-blue); }
+        .stat-icon.green { background: rgba(52,211,153,0.12);  color: var(--accent-green); }
+        .stat-icon.purple{ background: rgba(167,139,250,0.12); color: var(--accent-purple); }
+        .stat-icon.yellow{ background: rgba(251,146,60,0.12);  color: var(--accent-orange); }
+
+        .stat-info h3 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .stat-info p {
+            color: var(--text-muted);
+            margin: 0.25rem 0 0;
+            font-size: 0.8rem;
+        }
+
+        /* Main Chart Card */
+        .chart-main-card {
+            background: var(--bg-card);
+            border-radius: 1.5rem;
+            padding: 1.75rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+            margin-bottom: 1.75rem;
+        }
+
+        .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .chart-header h3 {
+            margin: 0;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .chart-header h3 i {
+            color: var(--accent-blue);
+            font-size: 1.5rem;
+        }
+
+        .period-select {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.75rem;
+            font-size: 0.85rem;
+            background: var(--bg-surface);
+            color: var(--text-primary);
+            transition: all 0.3s;
+        }
+
+        .period-select:focus {
+            border-color: var(--accent-blue);
+            outline: none;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 1rem 0;
+        }
+
+        canvas {
+            max-height: 350px;
+            width: 100%;
+        }
+
+        /* Category Legend */
+        .category-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .legend-value {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-left: 0.25rem;
+        }
+
+        /* Category Stats Cards */
+        .category-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .category-stat-card {
+            background: var(--bg-card);
+            border-radius: 1rem;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s;
+            border: 1px solid var(--border-color);
+        }
+
+        .category-stat-card:hover {
+            transform: translateY(-2px);
+            background: var(--bg-card-hover);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            border-color: rgba(56,189,248,0.2);
+        }
+
+        .category-icon {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .category-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .category-count {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--accent-blue);
+        }
+
+        .category-percent {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        /* Loading State */
+        .loading-state {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--bg-surface);
+            border-top-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Alert */
+        .alert-custom {
+            border-radius: 1rem;
+            border: none;
+            padding: 0.9rem 1.2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Info Footer */
+        .info-footer {
+            background: rgba(56, 189, 248, 0.07);
+            border: 1px solid rgba(56, 189, 248, 0.15);
+            padding: 14px 18px;
+            border-radius: 12px;
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+            margin-top: 1rem;
+        }
+
+        .info-footer strong {
+            color: var(--accent-blue);
+        }
+
+        .info-footer b {
+            color: var(--text-primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hr-main { padding: 1rem; }
+            .page-header { padding: 1.5rem; }
+            .page-header h1 { font-size: 1.3rem; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .chart-container { text-align: center; padding: 1rem; }
+            .category-stats { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .stat-card, .chart-main-card {
+            animation: fadeInUp 0.4s ease forwards;
+        }
+    </style>
+</head>
+<body>
+
+<div class="hr-main">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>
+            <i class="bi bi-pie-chart-fill"></i>
+            Document Category Analytics
+        </h1>
+        <p>Visualize document distribution across different categories</p>
+    </div>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-custom">
+                <li class="breadcrumb-item"><a href="{{ url_for('hr_dashboard') }}" id="dashboardLink">HR Dashboard</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Document Analytics</li>
+            </ol>
+        </nav>
+
+        <div class="hr-info">
+            <div class="hr-avatar" id="hrAvatar">H</div>
+            <div>
+                <strong>{{ session.name }}</strong>
+                <div><small id="currentDate"></small></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Chart Card -->
+    <div class="chart-main-card">
+        <div class="chart-header">
+            <h3>
+                <i class="bi bi-pie-chart"></i>
+                Document Categories Distribution
+            </h3>
+        </div>
+
+        <div class="chart-container text-center">
+            <canvas id="empChart"></canvas>
+        </div>
+
+        <!-- Category Legend -->
+        <div class="category-legend" id="categoryLegend"></div>
+    </div>
+
+    <!-- Category Stats Cards -->
+    <div class="category-stats" id="categoryStatsCards"></div>
+
+    <!-- Info Footer -->
+    <div class="info-footer">
+        <strong>📊 Analytics Insight:</strong>
+        <span id="insightText">
+            🥇 Top Category: <b>{{ top_category }}</b> |
+            📁 Total Docs: <b>{{ total_docs }}</b> |
+            👤 Most Active Employee: <b>{{ top_employee }}</b>
+        </span>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+const labels = JSON.parse('{{ names | tojson | safe }}');
+const datasetData = JSON.parse('{{ dataset | tojson | safe }}');
+const filesData = JSON.parse('{{ emp_files | tojson | safe }}');
+
+new Chart(document.getElementById('empChart'), {
+    type: 'bar',
+    data: {
+        labels: labels,
+        datasets: [
+            {
+                label: 'Personal',
+                data: datasetData.Personal,
+                backgroundColor: 'rgba(244, 114, 182, 0.85)',  /* pink */
+                borderRadius: 8
+            },
+            {
+                label: 'Office',
+                data: datasetData.Office,
+                backgroundColor: 'rgba(56, 189, 248, 0.85)',   /* cyan-blue */
+                borderRadius: 8
+            },
+            {
+                label: 'Education',
+                data: datasetData.Education,
+                backgroundColor: 'rgba(52, 211, 153, 0.85)',   /* green */
+                borderRadius: 8
+            },
+            {
+                label: 'Finance',
+                data: datasetData.Finance,
+                backgroundColor: 'rgba(251, 146, 60, 0.85)',   /* orange */
+                borderRadius: 8
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                labels: {
+                    color: '#8fafc8',
+                    font: { family: 'Inter', size: 13 }
+                }
+            },
+            tooltip: {
+                backgroundColor: '#0f2340',
+                borderColor: 'rgba(56,189,248,0.2)',
+                borderWidth: 1,
+                titleColor: '#e8f4ff',
+                bodyColor: '#8fafc8',
+                callbacks: {
+                    label: function(context) {
+                        let empName = context.label;
+                        let category = context.dataset.label;
+                        let files = filesData[empName][category];
+
+                        let output = [];
+                        output.push(category + ": " + context.raw);
+
+                        if (files && files.length > 0) {
+                            output.push("-----------");
+                            output.push(...files);
+                        }
+
+                        return output;
+                    }
+                }
+            }
+        },
+        scales: {
+            x: {
+                stacked: false,
+                ticks: { color: '#8fafc8', font: { family: 'Inter' } },
+                grid: { color: 'rgba(255,255,255,0.05)' }
+            },
+            y: {
+                stacked: false,
+                beginAtZero: true,
+                ticks: { color: '#8fafc8', font: { family: 'Inter' } },
+                grid: { color: 'rgba(255,255,255,0.05)' }
+            }
+        }
+    }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Dashboard - Smart Document Locker</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-base:    #0d0f1a;
+            --bg-card:    #131627;
+            --bg-card2:   #181c2e;
+            --bg-hover:   #1e2236;
+            --border:     rgba(255,255,255,0.07);
+            --accent:     #00d4ff;
+            --accent2:    #7c3aed;
+            --accent3:    #10b981;
+            --accent4:    #f59e0b;
+            --text-white: #e8eaf6;
+            --text-mid:   #8892b0;
+            --text-muted: #4a5280;
+            --sb-w:       240px;
+            --sb-coll:    68px;
+            --shadow:     0 8px 32px rgba(0,0,0,0.4);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body { height: 100%; overflow-x: hidden; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-base);
+            color: var(--text-white);
+            min-height: 100vh;
+        }
+
+        .layout { display: flex; min-height: 100vh; }
+
+        /* ── SIDEBAR ── */
+        .hr-sidebar {
+            width: var(--sb-w);
+            min-height: 100vh;
+            height: 100%;
+            background: var(--bg-card);
+            position: fixed;
+            left: 0; top: 0; bottom: 0;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border);
+            overflow: hidden;
+            flex-shrink: 0;
+            transition: width 0.3s ease;
+        }
+
+        /* ── COLLAPSED STATE ── */
+        .hr-sidebar.collapsed { width: var(--sb-coll); }
+
+        .hr-sidebar.collapsed .brand-text,
+        .hr-sidebar.collapsed .profile-info,
+        .hr-sidebar.collapsed .nav-section,
+        .hr-sidebar.collapsed a span,
+        .hr-sidebar.collapsed .badge-count,
+        .hr-sidebar.collapsed .toggle-label { display: none; }
+
+        .hr-sidebar.collapsed .sidebar-header { justify-content: center; padding: 1rem 0; }
+        .hr-sidebar.collapsed .hr-profile     { justify-content: center; padding: 0.9rem 0; }
+        .hr-sidebar.collapsed a              { justify-content: center; padding: 0.75rem 0; margin-right: 0; border-radius: 0; }
+        .hr-sidebar.collapsed .sidebar-toggle { padding: 0 6px; }
+        .hr-sidebar.collapsed .toggle-btn    { justify-content: center; padding: 9px 0; }
+
+        .hr-main {
+            margin-left: var(--sb-w);
+            flex: 1;
+            min-height: 100vh;
+            padding: 1.5rem 1.8rem;
+            width: calc(100% - var(--sb-w));
+            transition: margin-left 0.3s ease, width 0.3s ease;
+        }
+
+        .hr-main.expanded {
+            margin-left: var(--sb-coll);
+            width: calc(100% - var(--sb-coll));
+        }
+
+        .sidebar-header {
+            padding: 1.3rem 1.1rem 1rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            flex-shrink: 0;
+        }
+
+        .brand-mark {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; color: #fff;
+            flex-shrink: 0;
+            box-shadow: 0 4px 14px rgba(0,212,255,0.3);
+        }
+
+        .sidebar-header .brand-text h4 {
+            font-size: 0.95rem; font-weight: 800;
+            margin: 0; white-space: nowrap;
+            background: linear-gradient(90deg, #fff, #94a3b8);
+            -webkit-background-clip: text; background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .sidebar-header .brand-text p {
+            font-size: 0.62rem; color: var(--text-muted);
+            margin: 0; white-space: nowrap;
+        }
+
+        .hr-profile {
+            padding: 0.9rem 1.1rem;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 0.7rem;
+            flex-shrink: 0;
+        }
+
+        .profile-avatar {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border-radius: 11px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.95rem; font-weight: 800; color: #fff;
+            flex-shrink: 0;
+        }
+
+        .profile-info h6 { margin: 0; font-weight: 700; font-size: 0.85rem; color: var(--text-white); white-space: nowrap; }
+        .profile-info small { font-size: 0.65rem; color: var(--text-muted); }
+
+        .sidebar-nav { flex: 1; overflow-y: auto; padding: 0.8rem 0; scrollbar-width: none; }
+        .sidebar-nav::-webkit-scrollbar { display: none; }
+
+        .nav-section {
+            padding: 0.65rem 1.1rem 0.3rem;
+            font-size: 0.58rem;
+            font-family: 'Space Mono', monospace;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .hr-sidebar a {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.65rem 1.1rem;
+            color: var(--text-mid);
+            text-decoration: none;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+            margin: 2px 8px 2px 0;
+            border-radius: 0 10px 10px 0;
+            font-size: 0.84rem; font-weight: 500;
+        }
+
+        .hr-sidebar a i { font-size: 1rem; width: 20px; flex-shrink: 0; }
+
+        .hr-sidebar a:hover {
+            color: var(--text-white);
+            background: rgba(0,212,255,0.08);
+            border-left-color: var(--accent);
+        }
+
+        .hr-sidebar a.active {
+            color: var(--accent);
+            background: rgba(0,212,255,0.1);
+            border-left-color: var(--accent);
+        }
+
+        .badge-count {
+            margin-left: auto;
+            background: var(--accent);
+            color: #000;
+            padding: 2px 7px;
+            border-radius: 20px;
+            font-size: 0.62rem;
+            font-weight: 700;
+        }
+
+        /* ── TOGGLE BUTTON ── */
+        .sidebar-toggle {
+            padding: 0 12px;
+            margin-bottom: 14px;
+            flex-shrink: 0;
+        }
+
+        .toggle-btn {
+            width: 100%;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            color: var(--text-mid);
+            border-radius: 10px;
+            padding: 9px 12px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .toggle-btn:hover { background: rgba(0,212,255,0.10); color: var(--accent); border-color: var(--accent); }
+
+        /* ── TOP BAR ── */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.6rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .top-bar-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .search-box { position: relative; width: 1000px; max-width: 100%; margin-left: 0; }
+
+        .search-box i {
+            position: absolute; left: 0.9rem; top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted); font-size: 0.9rem;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.65rem 1rem 0.65rem 2.5rem;
+            background: var(--bg-card2);
+            border: 1px solid var(--border);
+            border-radius: 0.7rem;
+            color: var(--text-white);
+            font-size: 0.9rem;
+            font-family: 'DM Sans', sans-serif;
+            transition: 0.2s;
+        }
+
+        .search-box input::placeholder { color: var(--text-muted); }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
+        }
+
+        .icon-btn {
+            width: 38px; height: 38px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-card2);
+            color: var(--text-mid);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+        .icon-btn .dot {
+            position: absolute; top: -2px; right: -2px;
+            width: 9px; height: 9px;
+            background: #ef4444;
+            border-radius: 50%;
+            border: 2px solid var(--bg-base);
+        }
+
+        .user-chip {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.3rem 0.85rem 0.3rem 0.4rem;
+            background: var(--bg-card2);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .user-chip:hover { border-color: var(--accent); }
+
+        .chip-av {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem; font-weight: 800; color: #fff;
+        }
+
+        .user-chip span { font-size: 0.8rem; font-weight: 600; color: var(--text-white); }
+
+        .dropdown-menu {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.9rem;
+            box-shadow: var(--shadow);
+        }
+
+        .dropdown-item { color: var(--text-mid); font-size: 0.83rem; }
+        .dropdown-item:hover { background: var(--bg-hover); color: var(--text-white); }
+        .dropdown-divider { border-color: var(--border); }
+
+        /* ── WELCOME BANNER ── */
+        .welcome-banner {
+            background: linear-gradient(135deg, #0f2557 0%, #1a1c4e 50%, #0d1b3e 100%);
+            border: 1px solid rgba(0,212,255,0.18);
+            border-radius: 1.2rem;
+            padding: 1.4rem 1.8rem;
+            margin-bottom: 1.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-banner::before {
+            content: '';
+            position: absolute; top: -40px; right: -40px;
+            width: 180px; height: 180px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,212,255,0.12), transparent 70%);
+        }
+
+        .welcome-banner h5 { font-size: 1rem; font-weight: 700; color: #fff; margin: 0; }
+        .welcome-banner p  { font-size: 0.78rem; color: rgba(255,255,255,0.55); margin: 0; }
+
+        .btn-light-outline {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            border-radius: 0.75rem;
+            padding: 0.5rem 1.1rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-flex; align-items: center; gap: 0.4rem;
+        }
+
+        .btn-light-outline:hover { background: rgba(0,212,255,0.15); color: var(--accent); border-color: var(--accent); }
+
+        /* ── STAT CARDS ── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.1rem;
+            margin-bottom: 1.6rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1.1rem;
+            padding: 1.3rem;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.25s, box-shadow 0.25s;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0;
+            height: 2px;
+        }
+
+        .stat-card.c-blue::before   { background: linear-gradient(90deg, var(--accent), #3b82f6); }
+        .stat-card.c-purple::before { background: linear-gradient(90deg, var(--accent2), #ec4899); }
+        .stat-card.c-green::before  { background: linear-gradient(90deg, var(--accent3), #34d399); }
+        .stat-card.c-amber::before  { background: linear-gradient(90deg, var(--accent4), #fcd34d); }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+        }
+
+        .stat-icon {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon.blue   { background: rgba(0,212,255,0.12); color: var(--accent); }
+        .stat-icon.purple { background: rgba(124,58,237,0.15); color: #a78bfa; }
+        .stat-icon.green  { background: rgba(16,185,129,0.12); color: var(--accent3); }
+        .stat-icon.yellow { background: rgba(245,158,11,0.12); color: var(--accent4); }
+
+        .stat-card h6 { font-size: 0.73rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.3rem; }
+        .stat-card h2 { font-size: 2rem; font-weight: 800; color: var(--text-white); margin: 0; }
+
+        .text-success { color: var(--accent3) !important; }
+        .text-warning { color: var(--accent4) !important; }
+
+        .spark-label { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.35rem; }
+
+        .view-link {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            font-size: 0.75rem; font-weight: 600;
+            color: var(--accent); text-decoration: none;
+            margin-top: 0.6rem; transition: gap 0.2s;
+        }
+
+        .view-link:hover { gap: 0.5rem; color: #38e8ff; }
+
+        /* ── TABLE CARD ── */
+        /* ───────── TABLE FIX ───────── */
+
+.table-card{
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 1.1rem;
+    overflow: hidden;
+    margin-top: 1.6rem;
+    box-shadow: var(--shadow);
+}
+
+.table-header{
+    padding: 1.1rem 1.4rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    background: rgba(255,255,255,0.01);
+}
+
+.table-header h5{
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-white);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.table-header h5 i{
+    color: var(--accent);
+}
+
+/* Bootstrap Override */
+.table-responsive{
+    overflow-x: auto;
+    background: transparent !important;
+}
+
+table,
+.table{
+    width: 100%;
+    margin: 0 !important;
+    border-collapse: collapse;
+
+    --bs-table-bg: transparent !important;
+    --bs-table-striped-bg: transparent !important;
+    --bs-table-hover-bg: transparent !important;
+    --bs-table-color: var(--text-mid) !important;
+
+    background: transparent !important;
+    color: var(--text-mid) !important;
+    border-color: var(--border) !important;
+}
+
+/* Header */
+.table thead{
+    background: var(--bg-card2) !important;
+}
+
+.table thead th{
+    background: var(--bg-card2) !important;
+    color: var(--text-muted) !important;
+
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+
+    padding: 0.95rem 1.1rem;
+
+    border: none !important;
+    border-bottom: 1px solid var(--border) !important;
+
+    white-space: nowrap;
+}
+
+/* Body */
+.table tbody tr{
+    transition: 0.25s ease;
+    background: transparent !important;
+}
+
+.table tbody td{
+    padding: 1rem 1.1rem;
+    vertical-align: middle;
+
+    font-size: 0.83rem;
+    color: var(--text-mid) !important;
+
+    border: none !important;
+    border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+
+    background: transparent !important;
+}
+
+/* Hover Effect */
+.table tbody tr:hover td{
+    background: var(--bg-hover) !important;
+    color: var(--text-white) !important;
+}
+
+/* Last Row */
+.table tbody tr:last-child td{
+    border-bottom: none !important;
+}
+
+/* Avatar */
+.tbl-avatar{
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+
+    background: linear-gradient(135deg,var(--accent),var(--accent2));
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #fff;
+
+    flex-shrink: 0;
+}
+
+/* Pills */
+.pill{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+
+    padding: 0.25rem 0.7rem;
+    border-radius: 100px;
+
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.pill.cyan{
+    background: rgba(0,212,255,0.12);
+    color: var(--accent);
+}
+
+.pill.green{
+    background: rgba(16,185,129,0.12);
+    color: var(--accent3);
+}
+
+.pill.amber{
+    background: rgba(245,158,11,0.12);
+    color: var(--accent4);
+}
+
+.pill.purple{
+    background: rgba(124,58,237,0.15);
+    color: #a78bfa;
+}
+
+.pill.red{
+    background: rgba(239,68,68,0.12);
+    color: #f87171;
+}
+
+/* Scrollbar */
+.table-responsive::-webkit-scrollbar{
+    height: 5px;
+}
+
+.table-responsive::-webkit-scrollbar-track{
+    background: transparent;
+}
+
+.table-responsive::-webkit-scrollbar-thumb{
+    background: rgba(0,212,255,0.25);
+    border-radius: 10px;
+}
+
+        .tbl-avatar {
+            width: 34px; height: 34px;
+            border-radius: 9px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; font-weight: 800; color: #fff;
+            flex-shrink: 0;
+        }
+
+        .pill {
+            display: inline-flex; align-items: center; gap: 0.25rem;
+            padding: 0.25rem 0.7rem;
+            border-radius: 100px;
+            font-size: 0.7rem; font-weight: 700;
+        }
+
+        .pill.cyan   { background: rgba(0,212,255,0.12); color: var(--accent); }
+        .pill.green  { background: rgba(16,185,129,0.12); color: var(--accent3); }
+        .pill.amber  { background: rgba(245,158,11,0.12); color: var(--accent4); }
+        .pill.purple { background: rgba(124,58,237,0.15); color: #a78bfa; }
+        .pill.red    { background: rgba(239,68,68,0.12);  color: #f87171; }
+
+        .act-btn {
+            width: 30px; height: 30px;
+            border-radius: 7px;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; text-decoration: none;
+            border: 1px solid var(--border);
+            background: var(--bg-card2);
+            color: var(--text-mid);
+            transition: all 0.2s;
+        }
+
+        .act-btn.view:hover   { background: rgba(0,212,255,0.15); color: var(--accent); border-color: var(--accent); }
+        .act-btn.dl:hover     { background: rgba(16,185,129,0.15); color: var(--accent3); border-color: var(--accent3); }
+        .act-btn.danger:hover { background: rgba(239,68,68,0.15); color: #f87171; border-color: #f87171; }
+
+        .btn-messages {
+            border: 1px solid var(--border);
+            background: var(--bg-card2);
+            color: var(--text-mid);
+            border-radius: 0.65rem;
+            padding: 0.42rem 0.85rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            transition: all 0.2s;
+        }
+
+        .btn-messages:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-messages .badge { background: #ef4444; color: #fff; font-size: 0.6rem; padding: 2px 5px; border-radius: 20px; }
+
+        .nav-item { list-style: none; }
+
+        .progress {
+            height: 5px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.75rem;
+        }
+
+        .progress-bar { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+        .bg-success { background: var(--accent3) !important; }
+        .bg-warning { background: var(--accent4) !important; }
+
+        .dash-footer {
+            text-align: center;
+            padding: 1.5rem 0 0.5rem;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 1200px) {
+            .stats-row { grid-template-columns: repeat(2,1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .hr-sidebar { display: none; }
+            .hr-main { margin-left: 0; width: 100%; padding: 1rem; }
+            .stats-row { grid-template-columns: 1fr 1fr; }
+            .top-bar { flex-direction: column; align-items: flex-start; }
+            .search-box { width: 100%; }
+            .top-bar-right { width: 100%; flex-wrap: wrap; }
+        }
+
+        @media (max-width: 480px) {
+            .stats-row { grid-template-columns: 1fr; }
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .stat-card { animation: fadeUp 0.4s both; }
+        .stat-card:nth-child(1) { animation-delay: 0.05s; }
+        .stat-card:nth-child(2) { animation-delay: 0.1s; }
+        .stat-card:nth-child(3) { animation-delay: 0.15s; }
+        .stat-card:nth-child(4) { animation-delay: 0.2s; }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,212,255,0.25); border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="layout">
+
+    <!-- ── SIDEBAR ── -->
+    <div class="hr-sidebar" id="hrSidebar">
+        <div class="sidebar-header">
+            <div class="brand-mark"><i class="bi bi-shield-lock-fill"></i></div>
+            <div class="brand-text">
+                <h4>HR Panel</h4>
+                <p>Document Management</p>
+            </div>
+        </div>
+
+        <div class="hr-profile">
+            <div class="profile-avatar">
+                {{ session['user_name'][0] if session.get('user_name') else 'H' }}
+            </div>
+            <div class="profile-info">
+                <h6>{{ session.get('user_name', 'HR Manager') }}</h6>
+                <small><i class="bi bi-dot text-success"></i>Online</small>
+            </div>
+        </div>
+
+        <div class="sidebar-nav">
+            <div class="nav-section">MAIN MENU</div>
+
+            <a href="{{ url_for('hr_dashboard') }}" class="active">
+                <i class="bi bi-speedometer2"></i>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="{{ url_for('hr_messages') }}">
+                <i class="bi bi-chat-dots"></i>
+                <span>Support Messages</span>
+            </a>
+
+            <a href="{{ url_for('hr_all_documents') }}">
+                <i class="bi bi-files"></i>
+                <span>All Documents</span>
+                {% if pending_documents and pending_documents > 0 %}
+                <span class="badge-count">{{ pending_documents }}</span>
+                {% endif %}
+            </a>
+
+            <a href="{{ url_for('hr_employees') }}">
+                <i class="bi bi-people"></i>
+                <span>Employees</span>
+                {% if total_employees and total_employees > 0 %}
+                <span class="badge-count">{{ total_employees }}</span>
+                {% endif %}
+            </a>
+
+            <div class="nav-section mt-3">REPORTS</div>
+
+            <a href="{{ url_for('analytics_page') }}">
+                <i class="bi bi-bar-chart"></i>
+                <span>Analytics</span>
+            </a>
+
+            <div class="nav-section mt-3">ACCOUNT</div>
+
+            <a href="{{ url_for('hr_profile') }}">
+                <i class="bi bi-person"></i>
+                <span>My Profile</span>
+            </a>
+
+            <a href="{{ url_for('upload_document') }}">
+                <i class="bi bi-cloud-arrow-up"></i>
+                <span>Upload Document</span>
+            </a>
+
+            <a href="{{ url_for('logout') }}">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+
+        <!-- ── COLLAPSE TOGGLE BUTTON ── -->
+        <div class="sidebar-toggle">
+            <button class="toggle-btn" onclick="toggleSidebar()">
+                <i class="bi bi-layout-sidebar" id="toggleIcon"></i>
+                <span class="toggle-label" id="toggleLabel">Collapse</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── MAIN CONTENT ── -->
+    <div class="hr-main" id="hrMain">
+
+        <!-- WELCOME BANNER -->
+        <div class="welcome-banner">
+            <div>
+                <h5>Welcome, {{ session.name }} 👋</h5>
+                <p>You have {{ pending_documents }} document{% if pending_documents != 1 %}s{% endif %} pending for review today.</p>
+            </div>
+            <a href="{{ url_for('hr_all_documents') }}" class="btn-light-outline">
+                <i class="bi bi-arrow-right"></i> Review Now
+            </a>
+        </div>
+
+        <!-- TOP BAR -->
+        <div class="top-bar">
+            <div class="top-bar-right" style="width:100%; justify-content:flex-end;">
+                <!-- Search -->
+                <form method="GET" action="{{ url_for('hr_dashboard') }}">
+                    <div class="search-box">
+                        <i class="bi bi-search"></i>
+                        <input type="text" name="search"
+                               value="{{ request.args.get('search','') }}"
+                               placeholder="Search documents...">
+                    </div>
+                </form>
+
+                <!-- Messages -->
+                <a href="{{ url_for('hr_messages') }}" class="btn-messages">
+                    <i class="bi bi-chat-dots"></i> Messages
+                    {% if unread_messages and unread_messages > 0 %}
+                        <span class="badge">{{ unread_messages }}</span>
+                    {% endif %}
+                </a>
+
+                <!-- Notification -->
+                <li class="nav-item" style="list-style:none">
+                    <a class="icon-btn" href="{{ url_for('hr_messages') }}">
+                        🔔
+                        {% if unread > 0 %}
+                        <span class="dot"></span>
+                        {% endif %}
+                    </a>
+                </li>
+
+                <!-- User dropdown -->
+                <div class="dropdown">
+                    <div class="user-chip" data-bs-toggle="dropdown">
+                        <div class="chip-av">{{ session.get('user_name','H')[0] }}</div>
+                        <span>{{ session.get('user_name', 'HR') }}</span>
+                        <i class="bi bi-chevron-down" style="font-size:0.65rem; color:var(--text-muted)"></i>
+                    </div>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{{ url_for('hr_profile') }}"><i class="bi bi-person me-2"></i>Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- STAT CARDS -->
+<div class="stats-row">
+
+    <!-- Total Employees -->
+    <div class="stat-card c-blue">
+        <div class="stat-icon blue">
+            <i class="bi bi-people"></i>
+        </div>
+
+        <h6>Total Employees</h6>
+
+        <h2>{{ total_employees }}</h2>
+
+        <a href="{{ url_for('hr_employees') }}" class="view-link">
+            View Employees <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+
+    <!-- Total Documents -->
+    <div class="stat-card c-purple">
+        <div class="stat-icon purple">
+            <i class="bi bi-files"></i>
+        </div>
+
+        <h6>Total Documents</h6>
+
+        <h2>{{ total_documents }}</h2>
+
+        <a href="{{ url_for('hr_all_documents') }}" class="view-link">
+            View Documents <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+
+    <!-- Approved Documents -->
+    <div class="stat-card c-green">
+
+        <div class="stat-icon green">
+            <i class="bi bi-check-circle"></i>
+        </div>
+
+        <h6>Approved Documents</h6>
+
+        <h2 class="text-success">
+            {{ verified_documents }}
+        </h2>
+
+        {% if total_documents > 0 %}
+
+        <div class="progress">
+            <div class="progress-bar bg-success progress-dynamic"
+                 data-width="{{ (verified_documents / total_documents * 100)|int }}">
+            </div>
+        </div>
+
+        <div class="spark-label">
+            {{ (verified_documents / total_documents * 100)|int }}% approved
+        </div>
+
+        {% else %}
+
+        <div class="progress">
+            <div class="progress-bar bg-success" style="width:0%"></div>
+        </div>
+
+        <div class="spark-label">
+            No approved documents
+        </div>
+
+        {% endif %}
+    </div>
+
+    <!-- Pending Verification -->
+    <div class="stat-card c-amber">
+
+        <div class="stat-icon yellow">
+            <i class="bi bi-hourglass-split"></i>
+        </div>
+
+        <h6>Pending Verification</h6>
+
+        <h2 class="text-warning">
+            {{ pending_documents }}
+        </h2>
+
+        {% if total_documents > 0 %}
+
+        <div class="progress">
+            <div class="progress-bar bg-warning progress-dynamic"
+                 data-width="{{ (pending_documents / total_documents * 100)|int }}">
+            </div>
+        </div>
+
+        <div class="spark-label">
+            Awaiting HR Review
+        </div>
+
+        {% else %}
+
+        <div class="progress">
+            <div class="progress-bar bg-warning" style="width:0%"></div>
+        </div>
+
+        <div class="spark-label">
+            No pending documents
+        </div>
+
+        {% endif %}
+    </div>
+
+</div>
+
+        <!-- RECENT DOCUMENTS TABLE -->
+        <div class="table-card">
+            <div class="table-header">
+                <h5><i class="bi bi-clock-history"></i> MY Recent Documents</h5>
+                <a href="{{ url_for('hr_all_documents') }}" class="btn-outline-accent">
+                    View All <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle text-center">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Document</th>
+                            <th>Category</th>
+                            <th>Uploaded</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for doc in recent_documents %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2 justify-content-center">
+                                    <div class="tbl-avatar">{{ doc[1][0] }}</div>
+                                    <strong style="color:var(--text-white)">{{ doc[1] }}</strong>
+                                </div>
+                            </td>
+                            <td>
+                                <span style="color:var(--text-white); font-weight:500">{{ doc[2] }}</span><br>
+                                <small style="color:var(--text-muted); font-family:'Space Mono',monospace; font-size:0.65rem">DOC-{{ doc[0] }}</small>
+                            </td>
+                            <td>
+                                <span class="pill cyan">{{ doc[3] }}</span>
+                            </td>
+                            <td>{{ doc[4] }}</td>
+                            <td>
+                                <div class="d-flex justify-content-center gap-2">
+                                    <a href="{{ url_for('view_document', doc_id=doc[0]) }}" class="act-btn view" title="View">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('download', doc_id=doc[0]) }}" class="act-btn dl" title="Download">
+                                        <i class="bi bi-download"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="dash-footer">
+            <i class="bi bi-shield-check" style="color:var(--accent3)"></i>
+            Secured with AES-256 Encryption &nbsp;·&nbsp; Smart Document Locker &copy; 2026
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Progress bars animate on load
+    document.querySelectorAll('.progress-dynamic').forEach(el => {
+        const w = el.getAttribute('data-width') || 0;
+        setTimeout(() => { el.style.width = w + '%'; }, 300);
+    });
+
+    // Sidebar collapse toggle
+    function toggleSidebar() {
+        const sidebar  = document.getElementById('hrSidebar');
+        const main     = document.getElementById('hrMain');
+        const icon     = document.getElementById('toggleIcon');
+        const label    = document.getElementById('toggleLabel');
+        const collapsed = sidebar.classList.toggle('collapsed');
+        main.classList.toggle('expanded', collapsed);
+        icon.className  = collapsed ? 'bi bi-layout-sidebar-reverse' : 'bi bi-layout-sidebar';
+        if (label) label.textContent = collapsed ? 'Expand' : 'Collapse';
+    }
+</script>
+
+</body>
+</html>

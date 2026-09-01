@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Employees List | HR - Smart Document Locker</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark:       #0a0f1e;
+            --bg-panel:      #0f1729;
+            --bg-card:       #131d35;
+            --bg-row-hover:  #172040;
+            --border:        rgba(255,255,255,0.07);
+            --accent-teal:   #00d4c8;
+            --accent-blue:   #4f8ef7;
+            --accent-purple: #b06ef3;
+            --accent-amber:  #f59e0b;
+            --text-primary:  #e8edf8;
+            --text-muted:    #6b7fa3;
+            --text-dim:      #3d4f72;
+            --success:       #10d48e;
+            --warning:       #f59e0b;
+            --danger:        #f05252;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-dark);
+            min-height: 100vh;
+            color: var(--text-primary);
+        }
+
+        .layout { display: flex; min-height: 100vh; }
+
+        .main { flex: 1; display: flex; flex-direction: column; }
+
+        /* ── Topbar ── */
+        .topbar {
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+            padding: 0.875rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky; top: 0; z-index: 50;
+        }
+
+        .breadcrumb-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .breadcrumb-nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .breadcrumb-nav a:hover { color: var(--accent-teal); }
+        .breadcrumb-nav .sep { color: var(--text-dim); }
+        .breadcrumb-nav .current { color: var(--accent-teal); font-weight: 600; }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .topbar-date {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.6rem;
+            padding: 0.4rem 0.85rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .notif-btn {
+            width: 36px; height: 36px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.6rem;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-muted);
+            cursor: pointer;
+            position: relative;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .notif-btn:hover { border-color: var(--accent-teal); color: var(--accent-teal); }
+
+        .notif-dot {
+            position: absolute;
+            top: 6px; right: 6px;
+            width: 7px; height: 7px;
+            background: var(--accent-teal);
+            border-radius: 50%;
+            border: 2px solid var(--bg-panel);
+        }
+
+        .user-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 2rem;
+            padding: 0.3rem 0.8rem 0.3rem 0.4rem;
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 30px; height: 30px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .user-info .name {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.2;
+        }
+
+        .user-info .role {
+            font-size: 0.7rem;
+            color: var(--accent-teal);
+        }
+
+        /* ── Content ── */
+        .content {
+            padding: 2rem;
+            flex: 1;
+        }
+
+        /* ── Page Title ── */
+        .page-title-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 1.75rem;
+        }
+
+        .page-title h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 0.25rem;
+        }
+
+        .page-title h1 i { color: var(--accent-teal); }
+
+        .page-title p {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        /* ── Stats Grid ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.25rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.3s, transform 0.3s;
+        }
+
+        .stat-card:hover {
+            border-color: rgba(0,212,200,0.25);
+            transform: translateY(-3px);
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%; height: 2px;
+            background: var(--accent-color, var(--accent-teal));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .stat-card:hover::after { opacity: 1; }
+
+        .stat-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .stat-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .stat-icon {
+            width: 38px; height: 38px;
+            border-radius: 0.6rem;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            font-family: 'Space Mono', monospace;
+            color: var(--text-primary);
+            line-height: 1;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .stat-sub .up { color: var(--success); }
+        .stat-sub .down { color: var(--danger); }
+
+        /* ── Flash Alerts ── */
+        .alert-custom {
+            border-radius: 0.75rem;
+            padding: 0.85rem 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            border: 1px solid transparent;
+        }
+
+        .alert-success {
+            background: rgba(16,212,142,0.1);
+            color: var(--success);
+            border-color: rgba(16,212,142,0.2);
+        }
+
+        .alert-danger {
+            background: rgba(240,82,82,0.1);
+            color: var(--danger);
+            border-color: rgba(240,82,82,0.2);
+        }
+
+        /* ── Search Bar ── */
+        .search-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.125rem 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 0.875rem;
+            align-items: center;
+        }
+
+        .search-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-dim);
+            font-size: 1rem;
+            pointer-events: none;
+        }
+
+        .search-wrapper input {
+            width: 100%;
+            padding: 0.7rem 1rem 0.7rem 2.75rem;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 0.6rem;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .search-wrapper input::placeholder { color: var(--text-dim); }
+
+        .search-wrapper input:focus {
+            outline: none;
+            border-color: var(--accent-teal);
+            box-shadow: 0 0 0 3px rgba(0,212,200,0.08);
+            background: var(--bg-dark);
+        }
+
+        .btn-search {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.7rem 1.25rem;
+            background: var(--accent-teal);
+            color: #0a0f1e;
+            border: none;
+            border-radius: 0.6rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-search:hover {
+            background: #00bfb4;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(0,212,200,0.3);
+        }
+
+        .btn-reset {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.7rem 1.25rem;
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            border-radius: 0.6rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-reset:hover {
+            border-color: var(--text-muted);
+            color: var(--text-primary);
+        }
+
+        /* ── Table ── */
+        .table-container{
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+}
+
+/* HEADER */
+.table-header{
+    padding: 1.1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(
+        135deg,
+        rgba(0,212,255,0.05),
+        rgba(124,58,237,0.05)
+    );
+}
+
+.table-header h5{
+    margin: 0;
+    font-weight: 700;
+    color: var(--text-white);
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+.table-header h5 i{
+    color: var(--accent);
+}
+
+/* COUNT BADGE */
+.emp-count{
+    background: rgba(0,212,255,0.10);
+    color: var(--accent);
+    border: 1px solid rgba(0,212,255,0.20);
+    padding: 0.30rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-family: 'Space Mono', monospace;
+}
+
+/* TABLE */
+.table-responsive{
+    overflow-x: auto;
+}
+
+.table{
+    width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+
+    /* REMOVE WHITE BOOTSTRAP COLORS */
+    --bs-table-bg: transparent !important;
+    --bs-table-striped-bg: transparent !important;
+    --bs-table-hover-bg: transparent !important;
+    --bs-table-color: var(--text-mid) !important;
+}
+
+/* TABLE HEAD */
+.table thead th{
+    background: var(--bg-card2) !important;
+    color: var(--text-muted) !important;
+    padding: 0.95rem 1.25rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.9px;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+/* TABLE BODY */
+.table tbody{
+    background: transparent !important;
+}
+
+.table tbody tr{
+    background: transparent !important;
+    transition: 0.2s ease;
+}
+
+.table tbody td{
+    background: transparent !important;
+    color: var(--text-mid) !important;
+    padding: 1rem 1.25rem;
+    vertical-align: middle;
+    font-size: 0.85rem;
+    border: none;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+/* HOVER */
+.table tbody tr:hover td{
+    background: rgba(0,212,255,0.05) !important;
+    color: var(--text-white) !important;
+}
+
+/* LAST ROW */
+.table tbody tr:last-child td{
+    border-bottom: none;
+}
+
+/* OPTIONAL NAME STYLE */
+.emp-name{
+    color: var(--text-white);
+    font-weight: 600;
+}
+        /* Employee avatar in table */
+        .emp-avatar {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 0.6rem;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700;
+            font-size: 0.875rem;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .emp-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .emp-details h6 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+        }
+
+        .emp-details small {
+            color: var(--text-muted);
+            font-size: 0.72rem;
+        }
+
+        /* ID badge */
+        .id-badge {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.4rem;
+        }
+
+        /* Department Badge */
+        .dept-badge {
+            display: inline-block;
+            padding: 0.28rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .dept-it       { background: rgba(79,142,247,0.12); color: var(--accent-blue); border: 1px solid rgba(79,142,247,0.2); }
+        .dept-hr       { background: rgba(16,212,142,0.1); color: var(--success); border: 1px solid rgba(16,212,142,0.2); }
+        .dept-finance  { background: rgba(245,158,11,0.1); color: var(--warning); border: 1px solid rgba(245,158,11,0.2); }
+        .dept-marketing{ background: rgba(176,110,243,0.1); color: var(--accent-purple); border: 1px solid rgba(176,110,243,0.2); }
+        .dept-sales    { background: rgba(0,212,200,0.1); color: var(--accent-teal); border: 1px solid rgba(0,212,200,0.2); }
+        .dept-default  { background: rgba(255,255,255,0.06); color: var(--text-muted); border: 1px solid var(--border); }
+
+        /* Email / Phone */
+        .text-muted-cell { color: var(--text-muted); font-size: 0.82rem; }
+
+        /* Empty State */
+        .empty-state {
+            padding: 4rem 2rem;
+            text-align: center;
+            color: var(--text-dim);
+        }
+
+        .empty-state i { font-size: 3rem; margin-bottom: 1rem; display: block; }
+        .empty-state h6 { color: var(--text-muted); margin-bottom: 0.25rem; }
+        .empty-state p { font-size: 0.85rem; }
+
+        /* ── Footer ── */
+        .footer-text {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+
+        .footer-text i { color: var(--accent-teal); }
+
+        /* ── Glow bar ── */
+        .glow-bar {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-teal), var(--accent-blue), var(--accent-purple), transparent);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 1100px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .content { padding: 1rem; }
+            .search-form { flex-direction: column; }
+            .table thead { display: none; }
+            .table tbody td {
+                display: block;
+                text-align: right;
+                padding: 0.6rem 1rem;
+                border-bottom: 1px solid rgba(255,255,255,0.04);
+            }
+            .table tbody td::before {
+                content: attr(data-label);
+                float: left;
+                font-weight: 600;
+                font-size: 0.75rem;
+                color: var(--text-dim);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .content > * { animation: fadeUp 0.35s ease forwards; }
+        .content > *:nth-child(1) { animation-delay: 0.05s; }
+        .content > *:nth-child(2) { animation-delay: 0.1s; }
+        .content > *:nth-child(3) { animation-delay: 0.15s; }
+        .content > *:nth-child(4) { animation-delay: 0.2s; }
+        .content > *:nth-child(5) { animation-delay: 0.25s; }
+        .content > *:nth-child(6) { animation-delay: 0.3s; }
+    </style>
+</head>
+<body>
+
+<div class="glow-bar"></div>
+
+<div class="layout">
+    <div class="main">
+
+        <!-- Topbar -->
+        <div class="topbar">
+            <div class="topbar-left">
+                <nav class="breadcrumb-nav">
+                    <a href="{{ url_for('hr_dashboard') }}">HR Dashboard</a>
+                    <span class="sep"><i class="bi bi-chevron-right" style="font-size:0.7rem;"></i></span>
+                    <span class="current">Employees</span>
+                </nav>
+            </div>
+
+            <div class="topbar-right">
+                <div class="topbar-date">
+                    <i class="bi bi-calendar3"></i>
+                    <span id="today-date">Loading...</span>
+                </div>
+                <div class="notif-btn">
+                    <i class="bi bi-bell"></i>
+                    <span class="notif-dot"></span>
+                </div>
+                <div class="user-pill">
+                    <div class="user-avatar">{{ session.name[0]|default('H') }}</div>
+                    <div class="user-info">
+                        <div class="name">{{ session.name|default('HR Manager') }}</div>
+                        <div class="role">Super Admin</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+
+            <!-- Page Title -->
+            <div class="page-title-row">
+                <div class="page-title">
+                    <h1><i class="bi bi-people-fill"></i> Employee Directory</h1>
+                    <p>View all employees and their document details</p>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card" style="--accent-color: var(--accent-teal);">
+                    <div class="stat-top">
+                        <span class="stat-label">Total Employees</span>
+                        <div class="stat-icon" style="background: rgba(0,212,200,0.1); color: var(--accent-teal);">
+                            <i class="bi bi-people"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value">{{ employees|length }}</div>
+                    
+                </div>
+
+                <div class="stat-card" style="--accent-color: var(--accent-blue);">
+                    <div class="stat-top">
+                        <span class="stat-label">Active This Month</span>
+                        <div class="stat-icon" style="background: rgba(79,142,247,0.12); color: var(--accent-blue);">
+                            <i class="bi bi-person-check"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value">{{ employees|length }}</div>
+                   
+                </div>
+
+                <div class="stat-card" style="--accent-color: var(--warning);">
+                    <div class="stat-top">
+                        <span class="stat-label">Pending Docs</span>
+                        <div class="stat-icon" style="background: rgba(245,158,11,0.12); color: var(--warning);">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value">{{ pending_count if pending_count else 0 }}</div>
+                    
+                </div>
+
+                <div class="stat-card" style="--accent-color: var(--success);">
+                    <div class="stat-top">
+                        <span class="stat-label">Verified</span>
+                        <div class="stat-icon" style="background: rgba(16,212,142,0.12); color: var(--success);">
+                            <i class="bi bi-building"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value">{{ verified_count if verified_count else 0 }}</div>
+                    
+                </div>
+            </div>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert-custom alert-{{ category }}">
+                            <i class="bi bi-{% if category == 'success' %}check-circle-fill{% elif category == 'danger' %}exclamation-triangle-fill{% else %}info-circle-fill{% endif %}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Search Bar -->
+            <div class="search-section">
+                <form method="GET" action="{{ url_for('hr_employees') }}" class="search-form">
+                    <div class="search-wrapper">
+                        <i class="bi bi-search"></i>
+                        <input type="text"
+                               name="search"
+                               placeholder="Search by name, email, or department..."
+                               value="{{ request.args.get('search', '') }}">
+                    </div>
+                    <button type="submit" class="btn-search">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                    <a href="{{ url_for('hr_employees') }}" class="btn-reset">
+                        <i class="bi bi-arrow-repeat"></i> Reset
+                    </a>
+                </form>
+            </div>
+
+            <!-- Table -->
+            <div class="table-container">
+                <div class="table-header">
+                    <h5>
+                        <i class="bi bi-person-badge-fill"></i>
+                        All Employees
+                    </h5>
+                    <span class="emp-count">{{ employees|length }} Total</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Employee Name</th>
+                                <th>Login ID</th>
+                                <th>Email</th>
+                                <th>Department</th>
+                                <th>Phone</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if employees and employees|length > 0 %}
+                                {% for emp in employees %}
+                                <tr>
+                                    <td data-label="ID">
+                                        <span class="id-badge">{{ emp[0] }}</span>
+                                    </td>
+                                    <td data-label="Employee Name">
+                                        <div class="emp-info">
+                                            <div class="emp-avatar">
+                                                {{ emp[1][0]|upper if emp[1] else 'E' }}
+                                            </div>
+                                            <div class="emp-details">
+                                                <h6>{{ emp[1] or '-' }}</h6>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td data-label="Login ID">
+                                        <span class="text-muted-cell">{{ emp[3] or '-' }}</span>
+                                    </td>
+                                    <td data-label="Email">
+                                        <span class="text-muted-cell">{{ emp[2] or '-' }}</span>
+                                    </td>
+                                    <td data-label="Department">
+                                        {% set dept = emp[4]|lower if emp[4] else '' %}
+                                        {% if 'it' in dept %}
+                                            <span class="dept-badge dept-it">{{ emp[4] }}</span>
+                                        {% elif 'hr' in dept %}
+                                            <span class="dept-badge dept-hr">{{ emp[4] }}</span>
+                                        {% elif 'finance' in dept %}
+                                            <span class="dept-badge dept-finance">{{ emp[4] }}</span>
+                                        {% elif 'market' in dept %}
+                                            <span class="dept-badge dept-marketing">{{ emp[4] }}</span>
+                                        {% elif 'sales' in dept %}
+                                            <span class="dept-badge dept-sales">{{ emp[4] }}</span>
+                                        {% elif emp[4] %}
+                                            <span class="dept-badge dept-default">{{ emp[4] }}</span>
+                                        {% else %}
+                                            <span class="text-muted-cell">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td data-label="Phone">
+                                        <span class="text-muted-cell">{{ emp[5] or '-' }}</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="6">
+                                        <div class="empty-state">
+                                            <i class="bi bi-people"></i>
+                                            <h6>No employees found</h6>
+                                            <p>Try adjusting your search criteria</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer-text">
+                <i class="bi bi-shield-check"></i> HR can view all employees and their document details &nbsp;·&nbsp; All actions are logged for audit
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const d = new Date();
+    document.getElementById('today-date').textContent = d.toLocaleDateString('en-GB', {
+        day: '2-digit', month: 'short', year: 'numeric'
+    });
+</script>
+</body>
+</html>
