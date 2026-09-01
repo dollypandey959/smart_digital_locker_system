@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Edit User | Smart Document Locker - Admin Panel</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg:        #050816;
+            --bg2:       #070B1F;
+            --surface:   #0D122B;
+            --surface2:  rgba(13,18,43,0.85);
+            --border:    rgba(0,207,255,0.08);
+            --border2:   rgba(0,207,255,0.18);
+            --cyan:      #00CFFF;
+            --cyan2:     #00E5FF;
+            --purple:    #7B5CFF;
+            --purple2:   #a48fff;
+            --yellow:    #F5B322;
+            --text:      #F4F7FF;
+            --text2:     #b8c2e8;
+            --text3:     #7C86B2;
+            --success:   #22c55e;
+            --danger:    #ef4444;
+            --warning:   #F5B322;
+            --card-bg:   #101735;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            background-image:
+                radial-gradient(ellipse 70% 50% at 5%   0%,   rgba(123,92,255,0.12) 0%, transparent 65%),
+                radial-gradient(ellipse 45% 45% at 95% 100%,  rgba(0,207,255,0.10) 0%, transparent 65%),
+                radial-gradient(ellipse 30% 30% at 80%  10%,  rgba(0,229,255,0.06) 0%, transparent 60%);
+        }
+
+        /* ── CONTAINER ── */
+        .edit-container { max-width: 950px; margin: 0 auto; }
+
+        /* ── BREADCRUMB ── */
+        .breadcrumb-custom {
+            background: transparent; padding: 0; margin-bottom: 1.5rem;
+            display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
+        }
+        .breadcrumb-custom a {
+            text-decoration: none; color: var(--text3); font-weight: 500;
+            transition: color .2s; display: inline-flex; align-items: center; gap: .3rem; font-size: 13px;
+        }
+        .breadcrumb-custom a:hover { color: var(--cyan); }
+        .breadcrumb-custom .separator { color: var(--border2); }
+        .breadcrumb-custom .current  { color: var(--cyan); font-weight: 600; font-size: 13px; }
+
+        /* ── MAIN CARD ── */
+        .edit-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            border: 1px solid var(--border2);
+            overflow: hidden;
+            animation: fadeInUp .4s ease forwards;
+            box-shadow: 0 4px 32px rgba(0,207,255,0.06);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── CARD HEADER ── */
+        .card-header-custom {
+            background: linear-gradient(135deg, rgba(0,207,255,0.07), rgba(123,92,255,0.07));
+            border-bottom: 1px solid var(--border2);
+            padding: 1.75rem 2rem;
+            position: relative; overflow: hidden;
+        }
+
+        .card-header-custom::before {
+            content: '';
+            position: absolute; top: -50%; right: -20%;
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, rgba(0,207,255,0.10) 0%, transparent 70%);
+            border-radius: 50%; pointer-events: none;
+        }
+
+        .card-header-custom h2 {
+            margin: 0; font-weight: 700; color: var(--text);
+            display: flex; align-items: center; gap: .75rem; font-size: 1.5rem;
+        }
+
+        .card-header-custom h2 i {
+            background: linear-gradient(135deg, rgba(0,207,255,0.15), rgba(123,92,255,0.15));
+            color: var(--cyan);
+            padding: 10px; border-radius: 12px; font-size: 1.2rem;
+            border: 1px solid rgba(0,207,255,0.22);
+        }
+
+        .card-header-custom p { margin: .5rem 0 0; color: var(--text3); font-size: .85rem; }
+
+        /* ── CARD BODY ── */
+        .card-body-custom { padding: 2rem; }
+
+        /* ── FORM SECTION ── */
+        .form-section { margin-bottom: 2rem; }
+
+        .section-title {
+            font-size: .75rem; text-transform: uppercase;
+            letter-spacing: 1.5px; font-weight: 700; color: var(--cyan);
+            margin-bottom: 1.25rem;
+            display: flex; align-items: center; gap: .5rem;
+        }
+
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, var(--border2), transparent);
+            margin: 1.5rem 0;
+        }
+
+        /* ── FORM ELEMENTS ── */
+        .form-group { margin-bottom: 1.25rem; }
+
+        .form-label {
+            font-weight: 600; color: var(--text2); margin-bottom: .5rem;
+            font-size: .85rem; display: flex; align-items: center; gap: .5rem;
+        }
+        .form-label i { color: var(--cyan); font-size: .9rem; width: 20px; }
+        .form-label .required-star { color: var(--danger); margin-left: 2px; }
+
+        .form-control, .form-select {
+            border: 1.5px solid var(--border2);
+            border-radius: 10px;
+            padding: .7rem 1rem;
+            font-size: .9rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: all .2s;
+            background: var(--surface);
+            color: var(--text);
+        }
+        .form-control::placeholder { color: var(--text3); }
+        .form-control:hover, .form-select:hover { border-color: var(--cyan2); }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 0 3px rgba(0,207,255,0.12);
+            background: rgba(13,18,43,0.95);
+            color: var(--text); outline: none;
+        }
+
+        /* validation */
+        .form-control.is-invalid, .form-select.is-invalid { border-color: var(--danger); background-image: none; }
+        .form-control.is-invalid:focus { box-shadow: 0 0 0 3px rgba(239,68,68,0.10); }
+        .form-control.is-valid  { border-color: var(--success); }
+
+        .invalid-feedback {
+            font-size: .7rem; margin-top: .4rem; color: var(--danger);
+            display: flex; align-items: center; gap: .3rem;
+        }
+        .valid-feedback {
+            font-size: .7rem; margin-top: .4rem; color: var(--success);
+            display: flex; align-items: center; gap: .3rem;
+        }
+
+        /* ── GRID ── */
+        .form-row { display: grid; grid-template-columns: repeat(2,1fr); gap: 1.25rem; }
+        @media (max-width: 640px) { .form-row { grid-template-columns: 1fr; gap: 1rem; } }
+
+        /* ── ROLE SELECTOR ── */
+        .role-selector { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: .5rem; }
+        .role-option { flex: 1; position: relative; }
+        .role-option input { position: absolute; opacity: 0; width: 0; height: 0; }
+        .role-option label {
+            display: flex; align-items: center; justify-content: center; gap: .5rem;
+            padding: .7rem 1rem;
+            border: 1.5px solid var(--border2);
+            border-radius: 10px; cursor: pointer;
+            transition: all .2s; background: var(--surface);
+            font-weight: 500; margin: 0; width: 100%; font-size: 13.5px;
+            color: var(--text2);
+        }
+        .role-option input:checked + label {
+            border-color: var(--cyan);
+            background: linear-gradient(135deg, rgba(0,207,255,0.10), rgba(123,92,255,0.08));
+            color: var(--cyan);
+            box-shadow: 0 0 0 3px rgba(0,207,255,0.10);
+        }
+        .role-option label:hover { border-color: var(--cyan2); background: rgba(0,207,255,0.05); color: var(--cyan); }
+
+        /* ── ACTION BUTTONS ── */
+        .action-buttons {
+            display: flex; gap: 1rem; flex-wrap: wrap;
+            margin-top: 2rem; padding-top: 1rem;
+            border-top: 1px solid var(--border2);
+        }
+
+        .btn-update {
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            color: #fff; border: none;
+            padding: .85rem 2rem; border-radius: 50px;
+            font-weight: 700; font-size: 13.5px;
+            display: inline-flex; align-items: center; gap: .5rem;
+            transition: all .2s;
+            box-shadow: 0 4px 18px rgba(0,207,255,0.28);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            cursor: pointer;
+        }
+        .btn-update:hover { opacity: .92; transform: translateY(-2px); box-shadow: 0 8px 26px rgba(0,207,255,0.38); }
+        .btn-update:disabled { opacity: .45; transform: none; cursor: not-allowed; }
+
+        .btn-back {
+            background: rgba(0,207,255,0.06); border: 1.5px solid var(--border2);
+            padding: .85rem 2rem; border-radius: 50px;
+            font-weight: 600; font-size: 13.5px;
+            display: inline-flex; align-items: center; gap: .5rem;
+            color: var(--text2); transition: all .2s; text-decoration: none;
+        }
+        .btn-back:hover { border-color: var(--cyan); color: var(--cyan); transform: translateY(-2px); }
+
+        /* ── USER PREVIEW ── */
+        .user-preview {
+            background: linear-gradient(135deg, rgba(0,207,255,0.05), rgba(123,92,255,0.05));
+            border-radius: 14px; padding: 1.25rem; margin-bottom: 1.5rem;
+            border: 1px solid var(--border2);
+            display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+        }
+
+        .preview-avatar {
+            width: 60px; height: 60px;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; font-weight: 700; color: #fff;
+            box-shadow: 0 4px 18px rgba(0,207,255,0.28);
+            flex-shrink: 0;
+        }
+
+        .preview-info h6 { margin: 0; font-weight: 700; color: var(--text); font-size: 14px; }
+        .preview-info p  { margin: 0; font-size: .75rem; color: var(--text3); }
+
+        .badge-role {
+            font-size: 11px; font-weight: 600; padding: 3px 10px;
+            border-radius: 20px; display: inline-block;
+        }
+        .badge-hr  { background: rgba(245,179,34,0.12); color: var(--yellow); border: 1px solid rgba(245,179,34,0.28); }
+        .badge-emp { background: rgba(123,92,255,0.12);  color: var(--purple2); border: 1px solid rgba(123,92,255,0.28); }
+
+        /* ── INFO ALERT ── */
+        .alert-info-custom {
+            background: linear-gradient(90deg, rgba(0,207,255,0.05), rgba(123,92,255,0.04));
+            border: 1px solid var(--border2);
+            border-left: 3px solid var(--cyan);
+            border-radius: 12px;
+            color: var(--text2); font-size: .8rem;
+            padding: .75rem 1rem; margin-top: 1rem;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .alert-info-custom i { color: var(--cyan); }
+
+        /* ── TOASTS ── */
+        .error-toast, .success-toast {
+            position: fixed; bottom: 20px; right: 20px;
+            padding: 12px 20px; border-radius: 12px;
+            display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            z-index: 1100; animation: slideInRight .3s ease;
+            font-size: 13.5px; font-weight: 500;
+        }
+        .error-toast   { background: var(--danger); color: #fff; }
+        .success-toast { background: linear-gradient(135deg, var(--cyan), var(--purple)); color: #fff; }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to   { transform: translateX(0);    opacity: 1; }
+        }
+
+        /* scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 5px; }
+
+        @media (max-width: 768px) {
+            body { padding: 1rem; }
+            .card-header-custom, .card-body-custom { padding: 1.25rem 1.5rem; }
+            .card-header-custom h2 { font-size: 1.25rem; }
+            .btn-update, .btn-back { padding: .7rem 1.5rem; font-size: .85rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="edit-container">
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-custom">
+        <a href="{{ url_for('admin_dashboard') }}">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        <span class="separator"><i class="bi bi-chevron-right"></i></span>
+        <a href="{{ url_for('admin_dashboard') }}">
+            <i class="bi bi-people"></i> Users
+        </a>
+        <span class="separator"><i class="bi bi-chevron-right"></i></span>
+        <span class="current"><i class="bi bi-pencil-square"></i> Edit User</span>
+    </div>
+
+    <!-- Main Card -->
+    <div class="edit-card">
+
+        <!-- Header -->
+        <div class="card-header-custom">
+            <h2>
+                <i class="bi bi-person-gear"></i>
+                Edit User Profile
+            </h2>
+            <p><i class="bi bi-shield-lock"></i> Update user information, role and personal details</p>
+        </div>
+
+        <!-- Body -->
+        <div class="card-body-custom">
+
+            <!-- User Preview -->
+            <div class="user-preview">
+                <div class="preview-avatar">
+                    {{ user[1][0]|upper if user[1] else 'U' }}
+                </div>
+                <div class="preview-info">
+                    <h6><i class="bi bi-person-circle"></i> {{ user[1] }}</h6>
+                    <p>
+                        <i class="bi bi-envelope"></i> {{ user[2] }} &nbsp;|&nbsp;
+                        <i class="bi bi-briefcase"></i> Current Role:
+                        <span class="badge-role {{ 'badge-hr' if user[3]=='HR' else 'badge-emp' }}">{{ user[3] }}</span>
+                    </p>
+                </div>
+            </div>
+
+            <form id="editUserForm" method="POST" action="{{ url_for('edit_user', id=user[0]) }}">
+
+                <!-- Personal Information -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="bi bi-person-badge"></i> Personal Information
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="bi bi-person"></i> Full Name
+                                <span class="required-star">*</span>
+                            </label>
+                            <input type="text" name="name" id="name" class="form-control"
+                                   value="{{ user[1] }}" required placeholder="Enter full name">
+                            <div class="invalid-feedback" id="nameError"></div>
+                            <div class="valid-feedback">Looks good!</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="bi bi-envelope"></i> Email Address
+                                <span class="required-star">*</span>
+                            </label>
+                            <input type="email" name="email" id="email" class="form-control"
+                                   value="{{ user[2] }}" required placeholder="user@company.com">
+                            <div class="invalid-feedback" id="emailError"></div>
+                            <div class="valid-feedback">Valid email!</div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="bi bi-building"></i> Department
+                                <span class="required-star">*</span>
+                            </label>
+                            <input type="text" name="department" id="department" class="form-control"
+                                   value="{{ user[4] }}" required placeholder="e.g., Information Technology">
+                            <div class="invalid-feedback" id="deptError"></div>
+                            <div class="valid-feedback">Looks good!</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="bi bi-telephone"></i> Phone Number
+                                <span class="required-star">*</span>
+                            </label>
+                            <input type="tel" name="phone" id="phone" class="form-control"
+                                   value="{{ user[5] }}" required placeholder="+91 XXXXXXXXXX">
+                            <div class="invalid-feedback" id="phoneError"></div>
+                            <div class="valid-feedback">Valid phone number!</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <!-- Professional Details -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="bi bi-briefcase"></i> Professional Details
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="bi bi-tag"></i> Designation
+                                <span class="required-star">*</span>
+                            </label>
+                            <input type="text" name="designation" id="designation" class="form-control"
+                                   value="{{ user[6] }}" required placeholder="e.g., Senior Software Engineer">
+                            <div class="invalid-feedback" id="designationError"></div>
+                            <div class="valid-feedback">Looks good!</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="bi bi-geo-alt"></i> Address
+                                <span class="required-star">*</span>
+                            </label>
+                            <input type="text" name="address" id="address" class="form-control"
+                                   value="{{ user[7] }}" required placeholder="Office / Residential address">
+                            <div class="invalid-feedback" id="addressError"></div>
+                            <div class="valid-feedback">Looks good!</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <!-- Role & Permissions -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="bi bi-shield-lock"></i> Role & Permissions
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-person-check"></i> User Role
+                        </label>
+                        <div class="role-selector">
+                            <div class="role-option">
+                                <input type="radio" name="role" id="roleEmployee" value="EMPLOYEE"
+                                       {% if user[3]=='EMPLOYEE' %}checked{% endif %}>
+                                <label for="roleEmployee">
+                                    <i class="bi bi-person-badge"></i> Employee
+                                </label>
+                            </div>
+                            <div class="role-option">
+                                <input type="radio" name="role" id="roleHR" value="HR"
+                                       {% if user[3]=='HR' %}checked{% endif %}>
+                                <label for="roleHR">
+                                    <i class="bi bi-shield-check"></i> HR Administrator
+                                </label>
+                            </div>
+                        </div>
+                        <small class="d-block mt-2" style="color:var(--text3);font-size:11px;">
+                            <i class="bi bi-info-circle"></i> HR role has access to manage documents and user approvals.
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Info Alert -->
+                <div class="alert-info-custom">
+                    <i class="bi bi-shield-check"></i>
+                    All changes are logged for security purposes. Updated information will be reflected immediately.
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button type="submit" id="submitBtn" class="btn-update">
+                        <i class="bi bi-save2"></i> Update User
+                    </button>
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn-back">
+                        <i class="bi bi-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer Note -->
+    <div class="text-center mt-4">
+        <small style="color:var(--text3);font-size:12px;">
+            <i class="bi bi-database-lock"></i> Secured system · All profile updates are encrypted
+        </small>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function showToast(message, type) {
+        const toast = document.createElement('div');
+        toast.className = type === 'success' ? 'success-toast' : 'error-toast';
+        toast.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill'} fs-5"></i><span>${message}</span>`;
+        document.body.appendChild(toast);
+        setTimeout(() => { toast.remove(); }, 3000);
+    }
+
+    function validateName(name) {
+        if (!name || name.trim().length < 2) return { valid: false, message: 'Name must be at least 2 characters long' };
+        if (name.trim().length > 100) return { valid: false, message: 'Name cannot exceed 100 characters' };
+        if (!/^[a-zA-Z\s\.\-']+$/.test(name.trim())) return { valid: false, message: 'Name can only contain letters, spaces, dots, hyphens, and apostrophes' };
+        return { valid: true, message: '' };
+    }
+
+    function validateEmail(email) {
+        if (!email || email.trim().length === 0) return { valid: false, message: 'Email is required' };
+        const emailRegex = /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/;
+        if (!emailRegex.test(email.trim())) return { valid: false, message: 'Please enter a valid email address (e.g., name@company.com)' };
+        if (email.trim().length > 100) return { valid: false, message: 'Email cannot exceed 100 characters' };
+        return { valid: true, message: '' };
+    }
+
+    function validateDepartment(dept) {
+        if (!dept || dept.trim().length < 2) return { valid: false, message: 'Department must be at least 2 characters' };
+        if (dept.trim().length > 50) return { valid: false, message: 'Department cannot exceed 50 characters' };
+        return { valid: true, message: '' };
+    }
+
+    function validatePhone(phone) {
+        if (!phone || phone.trim().length === 0) return { valid: false, message: 'Phone number is required' };
+        const phoneRegex = /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{3,14}$/;
+        if (!phoneRegex.test(phone.trim())) return { valid: false, message: 'Enter a valid phone number (e.g., +91 9876543210)' };
+        if (phone.trim().length > 20) return { valid: false, message: 'Phone number too long' };
+        return { valid: true, message: '' };
+    }
+
+    function validateDesignation(designation) {
+        if (!designation || designation.trim().length < 2) return { valid: false, message: 'Designation is required' };
+        if (designation.trim().length > 60) return { valid: false, message: 'Designation cannot exceed 60 characters' };
+        return { valid: true, message: '' };
+    }
+
+    function validateAddress(address) {
+        if (!address || address.trim().length < 3) return { valid: false, message: 'Address must be at least 3 characters' };
+        if (address.trim().length > 200) return { valid: false, message: 'Address cannot exceed 200 characters' };
+        return { valid: true, message: '' };
+    }
+
+    const nameInput        = document.getElementById('name');
+    const emailInput       = document.getElementById('email');
+    const deptInput        = document.getElementById('department');
+    const phoneInput       = document.getElementById('phone');
+    const designationInput = document.getElementById('designation');
+    const addressInput     = document.getElementById('address');
+    const submitBtn        = document.getElementById('submitBtn');
+
+    function validateField(input, validationFn, errorElementId) {
+        const errorElement = document.getElementById(errorElementId);
+        const result = validationFn(input.value);
+        if (!result.valid) {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+            if (errorElement) errorElement.textContent = result.message;
+            return false;
+        } else {
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
+            if (errorElement) errorElement.textContent = '';
+            return true;
+        }
+    }
+
+    function validateAllFields() {
+        const v = [
+            validateField(nameInput,        validateName,        'nameError'),
+            validateField(emailInput,       validateEmail,       'emailError'),
+            validateField(deptInput,        validateDepartment,  'deptError'),
+            validateField(phoneInput,       validatePhone,       'phoneError'),
+            validateField(designationInput, validateDesignation, 'designationError'),
+            validateField(addressInput,     validateAddress,     'addressError'),
+        ];
+        const isValid = v.every(Boolean);
+        submitBtn.disabled = !isValid;
+        return isValid;
+    }
+
+    [nameInput, emailInput, deptInput, phoneInput, designationInput, addressInput]
+        .forEach(el => el.addEventListener('input', () => validateAllFields()));
+
+    validateAllFields();
+
+    document.getElementById('editUserForm').addEventListener('submit', function(e) {
+        if (!validateAllFields()) {
+            e.preventDefault();
+            showToast('Please fix all validation errors before submitting', 'error');
+            return false;
+        }
+        const roleSelected = document.querySelector('input[name="role"]:checked');
+        if (!roleSelected) {
+            e.preventDefault();
+            showToast('Please select a user role', 'error');
+            return false;
+        }
+        showToast('Validating... Updating user information', 'success');
+        return true;
+    });
+
+    phoneInput.addEventListener('blur',  () => validateAllFields());
+    nameInput.addEventListener('blur',   function() { this.value = this.value.trim();              validateAllFields(); });
+    emailInput.addEventListener('blur',  function() { this.value = this.value.trim().toLowerCase(); validateAllFields(); });
+    nameInput.addEventListener('input',  function() { this.value = this.value.replace(/[<>]/g, ''); });
+</script>
+
+</body>
+</html>

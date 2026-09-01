@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Create User | Admin Panel - Smart Document Locker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+
+        :root {
+            --bg:        #050816;
+            --bg2:       #070B1F;
+            --surface:   #0D122B;
+            --surface2:  rgba(13,18,43,0.85);
+            --border:    rgba(0,207,255,0.08);
+            --border2:   rgba(0,207,255,0.18);
+            --cyan:      #00CFFF;
+            --cyan2:     #00E5FF;
+            --purple:    #7B5CFF;
+            --purple2:   #a48fff;
+            --yellow:    #F5B322;
+            --text:      #F4F7FF;
+            --text2:     #b8c2e8;
+            --text3:     #7C86B2;
+            --success:   #22c55e;
+            --danger:    #ef4444;
+            --warning:   #F5B322;
+            --info:      #00CFFF;
+            --card-bg:   #101735;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            background-image:
+                radial-gradient(ellipse 70% 50% at 5% 0%,  rgba(123,92,255,0.12) 0%, transparent 65%),
+                radial-gradient(ellipse 45% 45% at 95% 100%, rgba(0,207,255,0.10) 0%, transparent 65%),
+                radial-gradient(ellipse 30% 30% at 80% 10%, rgba(0,229,255,0.06) 0%, transparent 60%);
+        }
+
+        .create-user-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* ── PAGE HEADER ── */
+        .page-header {
+            background: var(--card-bg);
+            border: 1px solid var(--border2);
+            border-radius: 20px;
+            padding: 2rem 2.25rem;
+            margin-bottom: 1.75rem;
+            position: relative;
+            overflow: hidden;
+            animation: fadeUp 0.4s ease forwards;
+        }
+
+        .page-header::before {
+            content: '';
+            position: absolute; top: -60px; right: -60px;
+            width: 220px; height: 220px;
+            background: radial-gradient(circle, rgba(0,207,255,0.10) 0%, transparent 70%);
+            border-radius: 50%; pointer-events: none;
+        }
+
+        .page-header::after {
+            content: '';
+            position: absolute; bottom: -40px; left: 30%;
+            width: 160px; height: 160px;
+            background: radial-gradient(circle, rgba(123,92,255,0.08) 0%, transparent 70%);
+            border-radius: 50%; pointer-events: none;
+        }
+
+        .page-header h1 {
+            font-size: 1.7rem; font-weight: 700;
+            color: var(--text);
+            display: flex; align-items: center; gap: 12px; margin-bottom: 6px;
+        }
+
+        .page-header h1 i { color: var(--cyan); }
+        .page-header p  { color: var(--text3); font-size: 0.88rem; margin: 0; }
+
+        /* ── TOP BAR ── */
+        .top-bar {
+            background: var(--card-bg);
+            border: 1px solid var(--border2);
+            border-radius: 14px;
+            padding: 13px 20px;
+            margin-bottom: 1.75rem;
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 1rem;
+        }
+
+        .breadcrumb-custom { background: transparent; padding: 0; margin: 0; }
+        .breadcrumb-custom .breadcrumb-item a {
+            color: var(--text3); text-decoration: none; transition: color 0.2s; font-size: 13px;
+        }
+        .breadcrumb-custom .breadcrumb-item a:hover { color: var(--cyan); }
+        .breadcrumb-custom .breadcrumb-item.active { color: var(--cyan); font-weight: 600; font-size: 13px; }
+        .breadcrumb-custom .breadcrumb-item+.breadcrumb-item::before { color: var(--text3); }
+
+        .admin-info { display: flex; align-items: center; gap: 12px; }
+        .admin-avatar {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            border-radius: 11px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 15px; color: #fff;
+            box-shadow: 0 4px 14px rgba(0,207,255,0.3);
+        }
+        .admin-name  { font-size: 13px; font-weight: 600; color: var(--text); }
+        .admin-date  { font-size: 11px; color: var(--text3); }
+
+        /* ── FLASH ── */
+        .alert-custom {
+            border-radius: 12px; padding: 12px 18px; margin-bottom: 16px;
+            display: flex; align-items: center; gap: 10px;
+            font-size: 13.5px;
+        }
+        .alert-success { background: rgba(34,197,94,0.08);  border: 1px solid rgba(34,197,94,0.20);  color: #4ade80; }
+        .alert-danger  { background: rgba(239,68,68,0.08);  border: 1px solid rgba(239,68,68,0.20);  color: #f87171; }
+        .alert-warning { background: rgba(245,179,34,0.08); border: 1px solid rgba(245,179,34,0.20); color: var(--yellow); }
+        .alert-info    { background: rgba(0,207,255,0.08);  border: 1px solid rgba(0,207,255,0.20);  color: var(--cyan); }
+
+        /* ── FORM CARD ── */
+        .form-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border2);
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 1.75rem;
+            animation: fadeUp 0.45s ease forwards;
+        }
+
+        .card-header-custom {
+            background: linear-gradient(90deg, rgba(0,207,255,0.06), rgba(123,92,255,0.06));
+            border-bottom: 1px solid var(--border2);
+            padding: 1.4rem 2rem;
+        }
+
+        .card-header-custom h3 {
+            font-weight: 700; font-size: 15px;
+            color: var(--text);
+            display: flex; align-items: center; gap: 10px; margin: 0;
+        }
+
+        .card-header-custom h3 i { color: var(--cyan); }
+        .card-header-custom p { color: var(--text3); margin: 5px 0 0; font-size: 12.5px; }
+
+        .card-body-custom { padding: 2rem; }
+
+        /* ── SECTION TITLES ── */
+        .section-title {
+            font-size: 13px; font-weight: 700;
+            color: var(--cyan); letter-spacing: 0.04em;
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 1.25rem; padding-bottom: 10px;
+            border-bottom: 1px solid var(--border2);
+        }
+
+        /* ── FORM ELEMENTS ── */
+        .form-label {
+            font-weight: 600; color: var(--text2);
+            margin-bottom: 7px; font-size: 12.5px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .form-label i { color: var(--cyan); font-size: 13px; }
+
+        .input-wrap { position: relative; }
+        .input-wrap .inp-icon {
+            position: absolute; left: 13px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--text3); font-size: 14px; z-index: 2;
+        }
+        .input-wrap input,
+        .input-wrap textarea { padding-left: 36px; }
+
+        .form-control, .form-select {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            color: var(--text);
+            padding: 10px 14px;
+            font-size: 13.5px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: border 0.2s, box-shadow 0.2s;
+        }
+        .form-control::placeholder { color: var(--text3); }
+        .form-control:focus, .form-select:focus {
+            background: rgba(13,18,43,0.95);
+            border-color: var(--cyan);
+            box-shadow: 0 0 0 3px rgba(0,207,255,0.12);
+            color: var(--text); outline: none;
+        }
+        .form-select { color: var(--text2); }
+        .form-select option { background: #0D122B; color: var(--text); }
+        .form-text { color: var(--text3); font-size: 11px; margin-top: 5px; }
+        .req { color: var(--danger); margin-left: 2px; }
+
+        textarea.form-control { padding-left: 14px; resize: vertical; }
+
+        /* ── ROLE CARDS ── */
+        .role-cards { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 6px; }
+        .role-card {
+            flex: 1; min-width: 130px;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 14px;
+            padding: 1.2rem 1rem;
+            text-align: center; cursor: pointer;
+            transition: all 0.25s;
+        }
+        .role-card:hover { border-color: var(--cyan2); background: rgba(0,207,255,0.06); }
+        .role-card.selected {
+            border-color: var(--cyan);
+            background: linear-gradient(135deg, rgba(0,207,255,0.10), rgba(123,92,255,0.08));
+            box-shadow: 0 0 0 3px rgba(0,207,255,0.10);
+        }
+        .role-icon { font-size: 28px; color: var(--cyan); margin-bottom: 8px; }
+        .role-title { font-weight: 700; font-size: 13.5px; color: var(--text); margin-bottom: 4px; }
+        .role-desc  { font-size: 11px; color: var(--text3); }
+
+        /* ── INFO BOX ── */
+        .info-box {
+            background: linear-gradient(90deg, rgba(0,207,255,0.05), rgba(123,92,255,0.04));
+            border: 1px solid var(--border2);
+            border-left: 3px solid var(--cyan);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-top: 1.5rem;
+            display: flex; gap: 12px; align-items: flex-start;
+        }
+        .info-box i { color: var(--cyan); font-size: 17px; margin-top: 1px; }
+        .info-box p { margin: 0; font-size: 12.5px; color: var(--text3); line-height: 1.6; }
+        .info-box p strong { color: var(--text2); }
+
+        /* ── FORM FOOTER ── */
+        .form-footer {
+            display: flex; gap: 1rem; justify-content: flex-end;
+            margin-top: 2rem; padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+
+        .btn-amber {
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            color: #fff; border: none;
+            border-radius: 10px; padding: 10px 22px;
+            font-size: 13.5px; font-weight: 700;
+            cursor: pointer; transition: all 0.2s;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            display: inline-flex; align-items: center; gap: 7px;
+            box-shadow: 0 4px 18px rgba(0,207,255,0.28);
+        }
+        .btn-amber:hover { opacity: 0.92; transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,207,255,0.38); }
+
+        .btn-ghost {
+            background: rgba(0,207,255,0.06);
+            color: var(--text2);
+            border: 1px solid var(--border2);
+            border-radius: 10px; padding: 10px 22px;
+            font-size: 13.5px; font-weight: 500;
+            cursor: pointer; transition: all 0.2s;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            text-decoration: none;
+            display: inline-flex; align-items: center; gap: 7px;
+        }
+        .btn-ghost:hover { border-color: var(--cyan); color: var(--cyan); background: rgba(0,207,255,0.10); }
+
+        /* ── TIPS ── */
+        .tips-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            animation: fadeUp 0.5s ease forwards;
+        }
+        .tips-section h6 { color: var(--text); font-weight: 700; font-size: 14px; margin-bottom: 12px; }
+        .tips-section ul { padding-left: 18px; margin: 0; }
+        .tips-section li { color: var(--text3); font-size: 12.5px; margin-bottom: 5px; line-height: 1.5; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 5px; }
+
+        @media (max-width: 768px) {
+            .card-body-custom { padding: 1.25rem; }
+            .role-cards { flex-direction: column; }
+            .form-footer { flex-direction: column; }
+            .form-footer .btn-amber,
+            .form-footer .btn-ghost { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="create-user-container">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1><i class="bi bi-person-plus-fill"></i> Create New User Account</h1>
+        <p>Add new employees or HR managers to the document management system</p>
+    </div>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-custom">
+                <li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a></li>
+                <li class="breadcrumb-item active">Create User</li>
+            </ol>
+        </nav>
+        <div class="admin-info">
+            <div class="admin-avatar">{{ session.admin_name[0]|default('A') }}</div>
+            <div>
+                <div class="admin-name">{{ session.admin_name|default('Administrator') }}</div>
+                <div class="admin-date" id="currentDate"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert-custom alert-{{ category }}">
+                    <i class="bi bi-{% if category == 'success' %}check-circle-fill{% elif category == 'danger' %}exclamation-triangle-fill{% elif category == 'warning' %}exclamation-circle-fill{% else %}info-circle-fill{% endif %}"></i>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Form Card -->
+    <div class="form-card">
+        <div class="card-header-custom">
+            <h3><i class="bi bi-person-plus-fill"></i> User Registration Form</h3>
+            <p>Fill in the details below to create a new user account</p>
+        </div>
+
+        <div class="card-body-custom">
+            <form method="POST" action="{{ url_for('create_user') }}" novalidate>
+
+                <!-- Personal Info -->
+                <div class="section-title"><i class="bi bi-person-badge"></i> Personal Information</div>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="bi bi-person"></i> Full Name <span class="req">*</span></label>
+                        <div class="input-wrap">
+                            <i class="bi bi-person-fill inp-icon"></i>
+                            <input type="text" class="form-control" name="full_name"
+                                   placeholder="Enter full name"
+                                   pattern="[A-Za-z ]{3,50}"
+                                   title="Name must be 3-50 characters" required>
+                        </div>
+                        <div class="form-text">Letters only, 3–50 characters</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="bi bi-envelope"></i> Email Address <span class="req">*</span></label>
+                        <div class="input-wrap">
+                            <i class="bi bi-envelope-fill inp-icon"></i>
+                            <input type="email" class="form-control" name="email"
+                                   placeholder="user@company.com" required>
+                        </div>
+                        <div class="form-text">Valid email for notifications and login</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="bi bi-telephone"></i> Phone Number</label>
+                        <div class="input-wrap">
+                            <i class="bi bi-telephone-fill inp-icon"></i>
+                            <input type="tel" class="form-control" name="phone"
+                                   placeholder="9876543210"
+                                   pattern="[0-9]{10}" title="Enter 10-digit number">
+                        </div>
+                        <div class="form-text">Optional — 10-digit mobile number</div>
+                    </div>
+                </div>
+
+                <!-- Account Details -->
+                <div class="section-title"><i class="bi bi-shield-lock"></i> Account Details</div>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="bi bi-person-badge"></i> Login ID <span class="req">*</span></label>
+                        <div class="input-wrap">
+                            <i class="bi bi-person-circle inp-icon"></i>
+                            <input type="text" class="form-control" name="login_id"
+                                   placeholder="Choose a unique username"
+                                   pattern="[A-Za-z0-9]{4,20}"
+                                   title="4-20 characters, letters & numbers only" required>
+                        </div>
+                        <div class="form-text">Min. 4 characters, letters and numbers only</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="bi bi-key"></i> Password <span class="req">*</span></label>
+                        <div class="input-wrap">
+                            <i class="bi bi-lock-fill inp-icon"></i>
+                            <input type="password" class="form-control" name="password" id="password"
+                                   placeholder="Create strong password"
+                                   pattern="(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).{8,}"
+                                   title="8+ chars, 1 uppercase, 1 number, 1 special char" required>
+                        </div>
+                        <div class="form-text">8+ chars, 1 uppercase, 1 number, 1 special character</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="bi bi-key"></i> Confirm Password <span class="req">*</span></label>
+                        <div class="input-wrap">
+                            <i class="bi bi-lock-fill inp-icon"></i>
+                            <input type="password" class="form-control" name="confirm_password" id="confirmPassword"
+                                   placeholder="Confirm password" required>
+                        </div>
+                        <div class="form-text">Must match the password above</div>
+                    </div>
+                </div>
+
+                <!-- Role -->
+                <div class="section-title"><i class="bi bi-person-workspace"></i> User Role</div>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-5">
+                        <label class="form-label">Select Role <span class="req">*</span></label>
+                        <select class="form-select" name="role" required>
+                            <option value="">Choose user role</option>
+                            <option value="Employee">Employee</option>
+                            <option value="HR">HR Manager</option>
+                        </select>
+                        <div class="form-text">Select the appropriate role for this user</div>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="role-cards">
+                            <div class="role-card" data-role="Employee">
+                                <div class="role-icon"><i class="bi bi-person"></i></div>
+                                <div class="role-title">Employee</div>
+                                <div class="role-desc">Regular staff member</div>
+                            </div>
+                            <div class="role-card" data-role="HR">
+                                <div class="role-icon"><i class="bi bi-person-badge"></i></div>
+                                <div class="role-title">HR Manager</div>
+                                <div class="role-desc">Human Resources</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Info -->
+                <div class="section-title"><i class="bi bi-building"></i> Additional Information</div>
+                <div class="row g-4 mb-2">
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="bi bi-building"></i> Department</label>
+                        <select class="form-select" name="department">
+                            <option value="">Select Department</option>
+                            <option value="Information Technology">Information Technology (IT)</option>
+                            <option value="Human Resources">Human Resources (HR)</option>
+                            <option value="Finance & Accounting">Finance & Accounting</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Sales">Sales</option>
+                            <option value="Operations">Operations</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="bi bi-briefcase"></i> Designation</label>
+                        <div class="input-wrap">
+                            <i class="bi bi-briefcase-fill inp-icon"></i>
+                            <input type="text" class="form-control" name="designation"
+                                   placeholder="e.g., Senior Software Engineer">
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label"><i class="bi bi-card-text"></i> Address</label>
+                        <textarea class="form-control" name="address" rows="2" placeholder="Enter address"></textarea>
+                    </div>
+                </div>
+
+                <!-- Info Box -->
+                <div class="info-box">
+                    <i class="bi bi-info-circle-fill"></i>
+                    <p><strong>Important:</strong> New users will receive a welcome email with login credentials. Password must contain at least 8 characters including uppercase, lowercase, numbers, and special characters. HR users have access to all documents and user management features.</p>
+                </div>
+
+                <!-- Footer -->
+                <div class="form-footer">
+                    <button type="reset" class="btn-ghost">
+                        <i class="bi bi-arrow-counterclockwise"></i> Reset Form
+                    </button>
+                    <a href="{{ url_for('edit_user', id=1) }}" class="btn-ghost">
+                        <i class="bi bi-pencil-square"></i> Edit User
+                    </a>
+                    <button type="submit" class="btn-amber">
+                        <i class="bi bi-check-lg"></i> Create User Account
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Tips Section -->
+    <div class="tips-section">
+        <div class="d-flex align-items-start gap-3 flex-wrap">
+            <i class="bi bi-lightbulb" style="font-size:26px;color:var(--yellow);flex-shrink:0;"></i>
+            <div style="flex:1;">
+                <h6>Quick Tips for User Creation</h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul>
+                            <li>Use official email addresses for better communication</li>
+                            <li>Login IDs should be unique and easy to remember</li>
+                            <li>Strong passwords help maintain security compliance</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul>
+                            <li>HR role has elevated privileges for document management</li>
+                            <li>Employees can only access their own documents</li>
+                            <li>All new accounts require admin approval</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('currentDate').innerText = new Date().toLocaleDateString('en-IN', {
+        year: 'numeric', month: 'long', day: 'numeric'
+    });
+
+    const roleCards  = document.querySelectorAll('.role-card');
+    const roleSelect = document.querySelector('select[name="role"]');
+
+    roleCards.forEach(card => {
+        card.addEventListener('click', function () {
+            roleCards.forEach(c => c.classList.remove('selected'));
+            this.classList.add('selected');
+            roleSelect.value = this.getAttribute('data-role');
+        });
+    });
+
+    document.querySelector('button[type="reset"]').addEventListener('click', function () {
+        setTimeout(() => { roleCards.forEach(c => c.classList.remove('selected')); }, 100);
+    });
+</script>
+</body>
+</html>

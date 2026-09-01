@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Pending Requests | Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+
+        :root {
+            --bg:           #050816;
+            --bg2:          #070B1F;
+            --surface:      #101735;
+            --surface2:     #0D122B;
+            --surface3:     rgba(16,23,53,0.85);
+            --border:       rgba(0,207,255,0.08);
+            --border2:      rgba(0,207,255,0.15);
+            --cyan:         #00CFFF;
+            --cyan2:        #00E5FF;
+            --purple:       #7B5CFF;
+            --purple2:      #9B7FFF;
+            --yellow:       #F5B322;
+            --text:         #F4F7FF;
+            --text2:        #7C86B2;
+            --text3:        #4A5480;
+            --success:      #00E096;
+            --danger:       #FF4D6A;
+            --info:         #00CFFF;
+            --warning:      #F5B322;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            background-image:
+                radial-gradient(ellipse 60% 50% at 10% 0%,   rgba(123,92,255,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 90% 100%, rgba(0,207,255,0.09) 0%, transparent 60%),
+                radial-gradient(ellipse 30% 30% at 75% 15%,  rgba(0,229,255,0.05) 0%, transparent 55%);
+        }
+
+        /* ── GRID LINES BACKGROUND ── */
+        body::before {
+            content: '';
+            position: fixed; inset: 0; pointer-events: none; z-index: 0;
+            background-image:
+                linear-gradient(rgba(0,207,255,0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,207,255,0.025) 1px, transparent 1px);
+            background-size: 44px 44px;
+        }
+
+        .pending-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+            position: relative; z-index: 1;
+        }
+
+        /* ── PAGE HEADER ── */
+        .page-header {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 20px;
+            padding: 2rem 2.25rem;
+            margin-bottom: 1.75rem;
+            position: relative;
+            overflow: hidden;
+            animation: fadeUp 0.4s ease forwards;
+        }
+
+        .page-header::before {
+            content: '';
+            position: absolute; top: -70px; right: -70px;
+            width: 240px; height: 240px;
+            background: radial-gradient(circle, rgba(0,207,255,0.10) 0%, transparent 70%);
+            border-radius: 50%; pointer-events: none;
+        }
+
+        .page-header::after {
+            content: '';
+            position: absolute; bottom: -50px; left: 25%;
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, rgba(123,92,255,0.07) 0%, transparent 70%);
+            border-radius: 50%; pointer-events: none;
+        }
+
+        /* accent line */
+        .page-header-inner {
+            position: relative;
+            padding-left: 18px;
+        }
+        .page-header-inner::before {
+            content: '';
+            position: absolute; left: 0; top: 0; bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, var(--cyan), var(--purple));
+            border-radius: 3px;
+        }
+
+        .page-header h1 {
+            font-size: 1.7rem; font-weight: 700;
+            color: var(--text);
+            display: flex; align-items: center; gap: 12px; margin-bottom: 6px;
+        }
+        .page-header h1 i { color: var(--cyan); filter: drop-shadow(0 0 6px rgba(0,207,255,0.5)); }
+        .page-header p  { color: var(--text2); font-size: 0.88rem; margin: 0; }
+
+        /* ── TOP BAR ── */
+        .top-bar {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 14px;
+            padding: 13px 20px;
+            margin-bottom: 1.75rem;
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 1rem;
+        }
+
+        .breadcrumb-custom { background: transparent; padding: 0; margin: 0; }
+        .breadcrumb-custom .breadcrumb-item a {
+            color: var(--text2); text-decoration: none; font-size: 13px; transition: color 0.2s;
+        }
+        .breadcrumb-custom .breadcrumb-item a:hover { color: var(--cyan); }
+        .breadcrumb-custom .breadcrumb-item.active { color: var(--cyan); font-weight: 600; font-size: 13px; }
+        .breadcrumb-custom .breadcrumb-item+.breadcrumb-item::before { color: var(--text3); }
+
+        .admin-info { display: flex; align-items: center; gap: 12px; }
+        .admin-avatar {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            border-radius: 11px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 15px; color: #fff;
+            box-shadow: 0 4px 16px rgba(0,207,255,0.25);
+        }
+        .admin-name { font-size: 13px; font-weight: 600; color: var(--text); }
+        .admin-date { font-size: 11px; color: var(--text2); }
+
+        /* ── FLASH ── */
+        .alert-custom {
+            border-radius: 12px; padding: 12px 18px; margin-bottom: 16px;
+            display: flex; align-items: center; gap: 10px; font-size: 13.5px;
+        }
+        .alert-success { background: rgba(0,224,150,0.08);  border: 1px solid rgba(0,224,150,0.20);  color: var(--success); }
+        .alert-danger  { background: rgba(255,77,106,0.08); border: 1px solid rgba(255,77,106,0.20); color: var(--danger); }
+        .alert-warning { background: rgba(245,179,34,0.08); border: 1px solid rgba(245,179,34,0.20); color: var(--warning); }
+        .alert-info    { background: rgba(0,207,255,0.08);  border: 1px solid rgba(0,207,255,0.20);  color: var(--info); }
+
+        /* ── STAT CARDS ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.1rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 18px;
+            padding: 1.25rem 1.4rem;
+            display: flex; align-items: center; gap: 16px;
+            transition: all 0.25s;
+            animation: fadeUp 0.4s ease forwards;
+            position: relative; overflow: hidden;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute; bottom: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .stat-card:hover {
+            border-color: rgba(0,207,255,0.30);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0,207,255,0.08);
+        }
+        .stat-card:hover::before { opacity: 1; }
+
+        .stat-icon {
+            width: 52px; height: 52px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; flex-shrink: 0;
+        }
+        .ic-pending  { background: rgba(0,207,255,0.10);  color: var(--cyan);    box-shadow: 0 0 18px rgba(0,207,255,0.12); }
+        .ic-approved { background: rgba(0,224,150,0.10);  color: var(--success); box-shadow: 0 0 18px rgba(0,224,150,0.10); }
+        .ic-rejected { background: rgba(255,77,106,0.10); color: var(--danger);  box-shadow: 0 0 18px rgba(255,77,106,0.10); }
+        .ic-total    { background: rgba(123,92,255,0.12); color: var(--purple);  box-shadow: 0 0 18px rgba(123,92,255,0.12); }
+
+        .stat-num   { font-size: 28px; font-weight: 700; color: var(--text); line-height: 1; }
+        .stat-label { font-size: 12px; color: var(--text2); margin-top: 4px; }
+
+        /* ── FILTER BAR ── */
+        .filter-bar {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 14px;
+            padding: 14px 20px;
+            margin-bottom: 1.75rem;
+            display: flex; align-items: center; gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-wrapper { position: relative; flex: 1; max-width: 360px; }
+        .search-wrapper i {
+            position: absolute; left: 13px; top: 50%;
+            transform: translateY(-50%); color: var(--text2); font-size: 14px;
+        }
+        .search-wrapper input {
+            width: 100%;
+            padding: 10px 14px 10px 38px;
+            background: var(--bg2);
+            border: 1.5px solid var(--border2);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 13.5px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: border 0.2s, box-shadow 0.2s;
+        }
+        .search-wrapper input::placeholder { color: var(--text3); }
+        .search-wrapper input:focus {
+            outline: none;
+            border-color: var(--cyan);
+            box-shadow: 0 0 0 3px rgba(0,207,255,0.10);
+            background: var(--surface2);
+        }
+
+        /* ── TABLE CARD ── */
+        .table-card {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 1.75rem;
+            animation: fadeUp 0.45s ease forwards;
+        }
+
+        .table-header {
+            padding: 1.2rem 1.6rem;
+            border-bottom: 1px solid var(--border2);
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 1rem;
+            background: rgba(13,18,43,0.60);
+        }
+
+        .table-header h4 {
+            font-size: 15px; font-weight: 700; color: var(--text);
+            margin: 0; display: flex; align-items: center; gap: 8px;
+        }
+        .table-header h4 i { color: var(--purple); }
+
+        .pending-count {
+            background: rgba(0,207,255,0.10);
+            color: var(--cyan);
+            border: 1px solid rgba(0,207,255,0.22);
+            padding: 3px 12px; border-radius: 20px;
+            font-size: 12px; font-weight: 600;
+        }
+
+        .refresh-btn {
+            background: rgba(0,207,255,0.06);
+            border: 1px solid var(--border2);
+            color: var(--text2);
+            border-radius: 9px; padding: 7px 14px;
+            font-size: 12.5px; font-weight: 500;
+            cursor: pointer; transition: all 0.2s;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .refresh-btn:hover { border-color: var(--cyan); color: var(--cyan); background: rgba(0,207,255,0.10); }
+
+        .table { color: var(--text2); margin: 0; }
+
+        .table thead th {
+            background: rgba(7,11,31,0.70);
+            border-bottom: 1px solid var(--border2);
+            color: var(--text3);
+            font-size: 11px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.08em;
+            padding: 12px 16px;
+        }
+
+        .table tbody td {
+            border-bottom: 1px solid var(--border);
+            padding: 14px 16px; vertical-align: middle;
+            font-size: 13.5px; color: var(--text2);
+            background: transparent;
+        }
+        .table tbody tr:last-child td { border-bottom: none; }
+        .table tbody tr:hover td {
+            background: rgba(0,207,255,0.025);
+            color: var(--text);
+        }
+
+        /* user cell */
+        .user-info { display: flex; align-items: center; gap: 11px; }
+        .user-avatar {
+            width: 40px; height: 40px; border-radius: 11px;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 15px; color: #fff; flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0,207,255,0.18);
+        }
+        .user-details h6 { margin: 0; font-size: 13.5px; font-weight: 600; color: var(--text); }
+        .user-details small { font-size: 11px; color: var(--text2); }
+
+        /* role badges */
+        .role-badge {
+            font-size: 11px; font-weight: 600; padding: 4px 12px;
+            border-radius: 20px; display: inline-block;
+        }
+        .role-badge.hr       { background: rgba(0,207,255,0.10);  color: var(--cyan);   border: 1px solid rgba(0,207,255,0.22); }
+        .role-badge.employee { background: rgba(123,92,255,0.12); color: var(--purple2);border: 1px solid rgba(123,92,255,0.22); }
+
+        /* action buttons */
+        .action-buttons { display: flex; gap: 7px; flex-wrap: wrap; }
+
+        .btn-approve {
+            background: rgba(0,224,150,0.07);
+            color: var(--success);
+            border: 1px solid rgba(0,224,150,0.22);
+            padding: 5px 13px; border-radius: 8px;
+            font-size: 12px; font-weight: 600;
+            transition: all 0.2s; text-decoration: none;
+            display: inline-flex; align-items: center; gap: 5px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .btn-approve:hover {
+            background: rgba(0,224,150,0.16); color: var(--success);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(0,224,150,0.18);
+        }
+
+        .btn-reject {
+            background: rgba(255,77,106,0.07);
+            color: var(--danger);
+            border: 1px solid rgba(255,77,106,0.20);
+            padding: 5px 13px; border-radius: 8px;
+            font-size: 12px; font-weight: 600;
+            transition: all 0.2s; text-decoration: none;
+            display: inline-flex; align-items: center; gap: 5px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .btn-reject:hover {
+            background: rgba(255,77,106,0.16); color: var(--danger);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(255,77,106,0.18);
+        }
+
+        /* empty state */
+        .empty-state {
+            text-align: center; padding: 3.5rem 1.5rem;
+        }
+        .empty-state i { font-size: 52px; color: var(--text3); display: block; margin-bottom: 14px; }
+        .empty-state h5 { color: var(--text2); font-size: 15px; margin-bottom: 6px; }
+        .empty-state p  { color: var(--text3); font-size: 13px; }
+
+        /* info footer */
+        .info-footer {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-left: 3px solid var(--cyan);
+            border-radius: 14px;
+            padding: 16px 20px;
+            display: flex; gap: 14px; align-items: flex-start;
+            animation: fadeUp 0.5s ease forwards;
+        }
+        .info-footer i { color: var(--cyan); font-size: 18px; margin-top: 1px; flex-shrink: 0; filter: drop-shadow(0 0 5px rgba(0,207,255,0.4)); }
+        .info-footer strong { color: var(--text); font-size: 13px; }
+        .info-footer small  { color: var(--text2); font-size: 12px; display: block; margin-top: 3px; line-height: 1.6; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: var(--bg2); }
+        ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 5px; }
+
+        @media (max-width: 768px) {
+            .pending-container { padding: 1rem; }
+            .page-header h1 { font-size: 1.3rem; }
+            .action-buttons { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="pending-container">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-inner">
+            <h1><i class="bi bi-clock-history"></i> Pending User Requests</h1>
+            <p>Review and manage new user registration requests</p>
+        </div>
+    </div>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-custom">
+                <li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a></li>
+                <li class="breadcrumb-item active">Pending Requests</li>
+            </ol>
+        </nav>
+        <div class="admin-info">
+            <div class="admin-avatar">A</div>
+            <div>
+                <div class="admin-name">Administrator</div>
+                <div class="admin-date" id="currentDate"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flash / Alert Container -->
+    <div id="alertContainer">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert-custom alert-{{ category }}">
+                        <i class="bi bi-{% if category == 'success' %}check-circle-fill{% elif category == 'danger' %}exclamation-triangle-fill{% elif category == 'warning' %}exclamation-circle-fill{% else %}info-circle-fill{% endif %}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon ic-pending"><i class="bi bi-clock-history"></i></div>
+            <div>
+                <div class="stat-num">{% if stat_pending %}{{ stat_pending }}{% else %}0{% endif %}</div>
+                <div class="stat-label">Pending Requests</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon ic-approved"><i class="bi bi-check2-circle"></i></div>
+            <div>
+                <div class="stat-num">{% if stat_approved %}{{ stat_approved }}{% else %}0{% endif %}</div>
+                <div class="stat-label">Approved</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon ic-rejected"><i class="bi bi-x-circle"></i></div>
+            <div>
+                <div class="stat-num">{% if stat_rejected %}{{ stat_rejected }}{% else %}0{% endif %}</div>
+                <div class="stat-label">Rejected</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon ic-total"><i class="bi bi-people"></i></div>
+            <div>
+                <div class="stat-num">{% if stat_total_users %}{{ stat_total_users }}{% else %}0{% endif %}</div>
+                <div class="stat-label">Total Active Users</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <div class="search-wrapper">
+            <i class="bi bi-search"></i>
+            <input type="text" id="searchInput" placeholder="Search by name, login ID, or email...">
+        </div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="table-card">
+        <div class="table-header">
+            <h4>
+                <i class="bi bi-person-plus"></i>
+                User Registration Requests
+                <span class="pending-count" id="pendingCountBadge">{{ stat_pending }}</span>
+            </h4>
+            <button class="refresh-btn" id="refreshBtn" onclick="location.reload()">
+                <i class="bi bi-arrow-repeat"></i> Refresh
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table" id="requestsTable">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Login ID</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Department</th>
+                        <th>Requested On</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="requestsTableBody">
+                {% if users %}
+                    {% for user in users %}
+                    <tr>
+                        <td>
+                            <div class="user-info">
+                                <div class="user-avatar">{{ user[1][0]|upper }}</div>
+                                <div class="user-details">
+                                    <h6>{{ user[1] }}</h6>
+                                    <small>{{ user[3] }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td data-label="Login ID">{{ user[2] }}</td>
+                        <td data-label="Email">{{ user[3] }}</td>
+                        <td data-label="Role">
+                            <span class="role-badge {{ 'hr' if user[4]=='HR' else 'employee' }}">{{ user[4] }}</span>
+                        </td>
+                        <td data-label="Department">{{ user[5] or '—' }}</td>
+                        <td data-label="Requested On" style="font-size:12px;color:var(--text2);">
+                            {{ user[7].strftime('%d %b %Y') if user[7] else '—' }}
+                        </td>
+                        <td data-label="Actions">
+                            <div class="action-buttons">
+                                <a href="{{ url_for('approve_user', id=user[0]) }}" class="btn-approve">
+                                    <i class="bi bi-check2-circle"></i> Approve
+                                </a>
+                                <a href="{{ url_for('reject_user', id=user[0]) }}" class="btn-reject">
+                                    <i class="bi bi-x-circle"></i> Reject
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <i class="bi bi-person-x"></i>
+                                <h5>No pending requests</h5>
+                                <p>There are currently no pending user registration requests.</p>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Info Footer -->
+    <div class="info-footer">
+        <i class="bi bi-info-circle-fill"></i>
+        <div>
+            <strong>Important Information</strong>
+            <small>Approving a user will send them a welcome email with login credentials and grant them access to the system. Rejected users will be notified and can reapply if needed.</small>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('currentDate').innerText = new Date().toLocaleDateString('en-IN', {
+        year: 'numeric', month: 'long', day: 'numeric'
+    });
+
+    // Live search
+    document.getElementById('searchInput').addEventListener('input', function () {
+        const q = this.value.toLowerCase();
+        document.querySelectorAll('#requestsTableBody tr').forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
+    });
+</script>
+</body>
+</html>
