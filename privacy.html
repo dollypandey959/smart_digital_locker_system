@@ -1,0 +1,160 @@
+<!DOCTYPE html> 
+<html>
+<head>
+    <title>Privacy Policy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-primary: #0d0d0d;
+            --bg-card: #161616;
+            --bg-card-inner: #1e1e1e;
+
+            /* DARK BLUE COLORS */
+            --accent-blue: #0a3d91;
+            --accent-blue-light: #1d4ed8;
+            --accent-blue-glow: rgba(29, 78, 216, 0.18);
+            --accent-blue-border: rgba(29, 78, 216, 0.35);
+
+            --text-primary: #f1f1f1;
+            --text-muted: #888;
+            --divider: rgba(255,255,255,0.07);
+        }
+
+        body {
+            background: var(--bg-primary);
+            min-height: 100vh;
+            font-family: 'Segoe UI', sans-serif;
+            color: var(--text-primary);
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -120px;
+            right: -120px;
+            width: 500px;
+            height: 500px;
+
+            /* BLUE GLOW */
+            background: radial-gradient(circle, rgba(29,78,216,0.12) 0%, transparent 70%);
+
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        .card {
+            border-radius: 20px;
+
+            /* BLUE BORDER */
+            border: 1px solid var(--accent-blue-border);
+
+            background: var(--bg-card);
+
+            /* BLUE SHADOW */
+            box-shadow: 0 0 40px rgba(29,78,216,0.08), 
+                        0 8px 32px rgba(0,0,0,0.6);
+        }
+
+        .card h2 {
+            color: var(--text-primary);
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .card p {
+            color: var(--text-muted);
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        ul li {
+            background: var(--bg-card-inner);
+            border: 1px solid var(--divider);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+
+        ul li:hover {
+            border-color: var(--accent-blue-border);
+            box-shadow: 0 0 14px var(--accent-blue-glow);
+        }
+
+        ul li::before {
+            content: '✦';
+
+            /* BLUE ICON */
+            color: var(--accent-blue-light);
+
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .text-muted {
+            color: var(--text-muted) !important;
+            font-size: 0.85rem;
+        }
+
+        .btn-primary {
+            background: var(--accent-blue);
+            border: none;
+            color: #ffffff;
+            font-weight: 700;
+            padding: 10px 32px;
+            border-radius: 10px;
+            letter-spacing: 0.3px;
+            transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-blue-light);
+            color: #ffffff;
+
+            /* BLUE GLOW */
+            box-shadow: 0 0 20px rgba(29,78,216,0.5);
+
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <div class="card p-4 shadow-sm">
+        <h2 class="mb-3">🔐 Privacy Policy</h2>
+
+        <p>Your privacy is our priority. We ensure that your documents and personal data remain secure.</p>
+
+        <ul>
+            <li>All files are encrypted and securely stored</li>
+            <li>We never share your data with third parties</li>
+            <li>Only authorized users can access documents</li>
+            <li>System activity is monitored for security</li>
+        </ul>
+
+        <p class="text-muted mt-3">Last updated: 2026</p>
+
+        <a href="{{ url_for('login') }}" class="btn btn-primary mt-2">Back to Login</a>
+    </div>
+</div>
+
+</body>
+</html>

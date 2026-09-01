@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Digital Document Locker System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:         #060a10;
+            --surface:    #0d1420;
+            --surface2:   #121a28;
+            --border:     rgba(255,255,255,0.07);
+            --border2:    rgba(255,255,255,0.13);
+            --text1:      #e8f0f8;
+            --text2:      #7a8a9e;
+            --text3:      #3d4d5e;
+            --blue:       #4fa3e8;
+            --blue-dim:   rgba(79,163,232,0.12);
+            --blue-glow:  rgba(79,163,232,0.28);
+            --green:      #00c896;
+            --green-dim:  rgba(0,200,150,0.12);
+            --amber:      #f0a830;
+            --amber-dim:  rgba(240,168,48,0.12);
+            --purple:     #a78bfa;
+            --purple-dim: rgba(167,139,250,0.12);
+            --r:          14px;
+            --r-sm:       8px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text1);
+            overflow-x: hidden;
+        }
+
+        a { text-decoration: none; }
+
+        /* ── NAVBAR ── */
+        .navbar {
+            background: rgba(6,10,16,0.92);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 0;
+            position: fixed; top: 0; left: 0; right: 0;
+            z-index: 1000;
+            transition: background .3s, padding .3s;
+        }
+
+        .navbar.scrolled {
+            padding: 10px 0;
+            background: rgba(6,10,16,0.98);
+        }
+
+        .navbar-brand {
+            font-family: 'Space Mono', monospace;
+            font-size: 17px; font-weight: 700;
+            color: var(--text1) !important;
+            display: flex; align-items: center; gap: 9px;
+            letter-spacing: -.01em;
+        }
+
+        .brand-icon {
+            width: 36px; height: 36px; border-radius: 9px;
+            background: linear-gradient(135deg, var(--blue), var(--purple));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 17px; color: #fff;
+            box-shadow: 0 4px 14px var(--blue-glow);
+        }
+
+        .nav-link {
+            color: var(--text2) !important;
+            font-size: 14px; font-weight: 500;
+            padding: 6px 14px !important;
+            border-radius: var(--r-sm);
+            transition: color .2s, background .2s;
+        }
+
+        .nav-link:hover { color: var(--text1) !important; background: var(--surface2); }
+
+        .btn-nav-outline {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 7px 18px;
+            border: 1px solid var(--border2);
+            border-radius: var(--r-sm);
+            color: var(--text1); font-size: 13.5px; font-weight: 500;
+            background: transparent;
+            transition: all .2s;
+        }
+
+        .btn-nav-outline:hover {
+            background: var(--surface2);
+            border-color: var(--blue);
+            color: var(--blue);
+        }
+
+        .btn-nav-primary {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 7px 18px;
+            border-radius: var(--r-sm);
+            color: #fff; font-size: 13.5px; font-weight: 600;
+            background: var(--blue);
+            border: 1px solid transparent;
+            transition: all .2s;
+            box-shadow: 0 4px 14px var(--blue-glow);
+        }
+
+        .btn-nav-primary:hover { opacity: .88; box-shadow: 0 6px 20px var(--blue-glow); color: #fff; }
+
+        /* ── HERO ── */
+        .hero {
+            min-height: 100vh;
+            display: flex; align-items: center;
+            padding: 120px 0 80px;
+            position: relative; overflow: hidden;
+        }
+
+        /* subtle grid background */
+        .hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+            pointer-events: none;
+        }
+
+        /* orbs */
+        .orb {
+            position: absolute; border-radius: 50%;
+            filter: blur(80px); pointer-events: none;
+        }
+        .orb-1 { width: 500px; height: 500px; top: -150px; left: -100px; background: rgba(79,163,232,.1); }
+        .orb-2 { width: 400px; height: 400px; bottom: -100px; right: -80px; background: rgba(167,139,250,.09); }
+        .orb-3 { width: 300px; height: 300px; top: 40%; left: 55%; background: rgba(0,200,150,.07); }
+
+        .hero-content { position: relative; z-index: 2; text-align: center; }
+
+        .hero-pill {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--blue-dim);
+            border: 1px solid rgba(79,163,232,.22);
+            border-radius: 20px; padding: 5px 14px;
+            font-size: 12.5px; font-weight: 600; color: var(--blue);
+            margin-bottom: 28px;
+        }
+
+        .hero-pill-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue); animation: blink 2s infinite; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+        .hero h1 {
+            font-size: clamp(2.4rem, 6vw, 4.2rem);
+            font-weight: 700;
+            line-height: 1.15;
+            letter-spacing: -.03em;
+            margin-bottom: 20px;
+        }
+
+        .hero h1 .accent {
+            background: linear-gradient(135deg, var(--blue) 0%, var(--purple) 100%);
+            background-clip: text;
+-webkit-background-clip: text;
+
+-webkit-text-fill-color: transparent;
+        }
+
+        .hero-sub {
+            font-size: 17px; color: var(--text2); line-height: 1.65;
+            max-width: 560px; margin: 0 auto 36px;
+        }
+
+        .hero-btns {
+            display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+            margin-bottom: 60px;
+        }
+
+        .btn-hero-primary {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 13px 30px;
+            background: var(--blue); color: #fff;
+            border-radius: 50px; font-size: 15px; font-weight: 600;
+            border: none;
+            box-shadow: 0 8px 24px var(--blue-glow);
+            transition: all .2s;
+        }
+        .btn-hero-primary:hover { opacity: .88; transform: translateY(-2px); box-shadow: 0 12px 32px var(--blue-glow); color: #fff; }
+
+        .btn-hero-ghost {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 13px 30px;
+            background: transparent; color: var(--text1);
+            border-radius: 50px; font-size: 15px; font-weight: 500;
+            border: 1px solid var(--border2);
+            transition: all .2s;
+        }
+        .btn-hero-ghost:hover { background: var(--surface2); border-color: var(--blue); color: var(--blue); transform: translateY(-2px); }
+
+        /* hero stats */
+        .hero-stats {
+            display: flex; gap: 0; justify-content: center;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            overflow: hidden;
+            max-width: 560px; margin: 0 auto;
+        }
+
+        .hs-item {
+            flex: 1; padding: 18px 16px; text-align: center;
+            border-right: 1px solid var(--border);
+        }
+        .hs-item:last-child { border-right: none; }
+
+        .hs-icon { font-size: 22px; margin-bottom: 6px; display: block; }
+        .hs-icon.blue { color: var(--blue); }
+        .hs-icon.green { color: var(--green); }
+        .hs-icon.purple { color: var(--purple); }
+
+        .hs-num {
+            font-family: 'Space Mono', monospace;
+            font-size: 20px; font-weight: 700; color: var(--text1);
+            display: block;
+        }
+
+        .hs-lbl { font-size: 11px; color: var(--text3); margin-top: 2px; text-transform: uppercase; letter-spacing: .07em; }
+
+        /* ── SECTION COMMONS ── */
+        section { padding: 100px 0; }
+
+        .sec-label {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 20px; padding: 4px 14px;
+            font-size: 11.5px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .1em;
+            color: var(--text3); margin-bottom: 14px;
+        }
+
+        .sec-title {
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 700; letter-spacing: -.02em;
+            margin-bottom: 14px; color: var(--text1);
+        }
+
+        .sec-sub { font-size: 16px; color: var(--text2); max-width: 560px; line-height: 1.65; }
+
+        /* ── FEATURES ── */
+        #features { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+
+        .feat-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 28px 24px;
+            height: 100%;
+            transition: all .2s;
+            position: relative; overflow: hidden;
+        }
+
+        .feat-card::before {
+            content: ''; position: absolute;
+            top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, var(--blue), var(--purple));
+            transform: scaleX(0); transition: transform .3s;
+        }
+
+        .feat-card:hover { border-color: var(--border2); transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .feat-card:hover::before { transform: scaleX(1); }
+
+        .feat-icon {
+            width: 48px; height: 48px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; margin-bottom: 16px;
+        }
+
+        .feat-icon.blue   { background: var(--blue-dim);   color: var(--blue); }
+        .feat-icon.green  { background: var(--green-dim);  color: var(--green); }
+        .feat-icon.purple { background: var(--purple-dim); color: var(--purple); }
+        .feat-icon.amber  { background: var(--amber-dim);  color: var(--amber); }
+
+        .feat-card h5 { font-size: 15.5px; font-weight: 600; margin-bottom: 9px; }
+        .feat-card p  { font-size: 13.5px; color: var(--text2); line-height: 1.6; margin: 0; }
+
+        /* ── HOW IT WORKS ── */
+        #how-it-works { background: var(--bg); }
+
+        .step-wrap { position: relative; }
+
+        .step-connector {
+            position: absolute;
+            top: 40px; left: calc(50% + 60px); right: calc(-50% + 60px);
+            height: 1px; background: var(--border2);
+            display: none;
+        }
+
+        @media (min-width: 768px) { .step-connector { display: block; } }
+
+        .step-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 32px 24px;
+            text-align: center;
+            height: 100%;
+            transition: all .2s;
+        }
+
+        .step-card:hover { border-color: var(--blue-dim); transform: translateY(-3px); }
+
+        .step-num {
+            width: 64px; height: 64px;
+            background: var(--blue-dim);
+            border: 1px solid rgba(79,163,232,.25);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 18px;
+            font-family: 'Space Mono', monospace;
+            font-size: 20px; font-weight: 700; color: var(--blue);
+        }
+
+        .step-card h5 { font-size: 15.5px; font-weight: 600; margin-bottom: 9px; }
+        .step-card p  { font-size: 13.5px; color: var(--text2); line-height: 1.6; margin: 0 0 16px; }
+
+        .step-ico { font-size: 32px; color: var(--text3); opacity: .4; }
+
+        /* ── STATS BAND ── */
+        .stats-band {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 56px 0;
+        }
+
+        .stat-item { text-align: center; }
+
+        .stat-num {
+            font-family: 'Space Mono', monospace;
+            font-size: 2.8rem; font-weight: 700;
+            background: linear-gradient(135deg, var(--blue), var(--purple));
+           background-clip: text;
+-webkit-background-clip: text;
+
+-webkit-text-fill-color: transparent;
+            display: block;
+        }
+
+        .stat-lbl { font-size: 13px; color: var(--text2); margin-top: 4px; font-weight: 500; }
+
+        /* ── CTA ── */
+        .cta-section {
+            background: var(--bg);
+            padding: 100px 0;
+            text-align: center;
+        }
+
+        .cta-box {
+            background: linear-gradient(135deg, rgba(79,163,232,.08) 0%, rgba(167,139,250,.06) 100%);
+            border: 1px solid rgba(79,163,232,.18);
+            border-radius: 24px;
+            padding: 60px 40px;
+            position: relative; overflow: hidden;
+        }
+
+        .cta-box::before {
+            content: ''; position: absolute; inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+        }
+
+        .cta-box h2 {
+            font-size: clamp(1.8rem, 4vw, 2.4rem);
+            font-weight: 700; letter-spacing: -.02em;
+            margin-bottom: 14px;
+        }
+
+        .cta-box p { font-size: 16px; color: var(--text2); margin-bottom: 32px; max-width: 480px; margin-left: auto; margin-right: auto; }
+
+        .cta-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+        /* ── FOOTER ── */
+        footer {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            padding: 60px 0 28px;
+        }
+
+        .foot-brand {
+            font-family: 'Space Mono', monospace;
+            font-size: 17px; font-weight: 700;
+            color: var(--text1);
+            display: flex; align-items: center; gap: 9px;
+            margin-bottom: 12px;
+        }
+
+        .foot-brand-icon {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: linear-gradient(135deg, var(--blue), var(--purple));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; color: #fff;
+        }
+
+        .foot-desc { font-size: 13px; color: var(--text2); line-height: 1.65; margin-bottom: 20px; }
+
+        .social-row { display: flex; gap: 8px; }
+
+        .social-btn {
+            width: 34px; height: 34px; border-radius: 8px;
+            background: var(--surface2); border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text2); font-size: 14px;
+            transition: all .2s;
+        }
+        .social-btn:hover { background: var(--blue-dim); border-color: rgba(79,163,232,.25); color: var(--blue); }
+
+        .foot-head { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--text3); margin-bottom: 16px; }
+
+        .foot-links { list-style: none; padding: 0; }
+
+        .foot-links li { margin-bottom: 10px; }
+
+        .foot-links a { font-size: 13.5px; color: var(--text2); transition: color .2s; }
+        .foot-links a:hover { color: var(--text1); }
+
+        .foot-contact-item {
+            display: flex; align-items: flex-start; gap: 10px;
+            font-size: 13px; color: var(--text2); margin-bottom: 10px;
+        }
+
+        .foot-contact-item i { color: var(--blue); flex-shrink: 0; margin-top: 2px; }
+
+        .foot-bottom {
+            margin-top: 48px; padding-top: 20px;
+            border-top: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 10px;
+            font-size: 12.5px; color: var(--text3);
+        }
+
+        .foot-enc {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: var(--green-dim); border: 1px solid rgba(0,200,150,.2);
+            border-radius: 20px; padding: 3px 11px;
+            font-size: 11.5px; color: var(--green);
+        }
+
+        /* ── UTILS ── */
+        .divider { height: 1px; background: var(--border); }
+
+        @media (max-width: 767px) {
+            section { padding: 64px 0; }
+            .hero { padding: 90px 0 60px; }
+            .hero-stats { flex-direction: column; }
+            .hs-item { border-right: none; border-bottom: 1px solid var(--border); }
+            .hs-item:last-child { border-bottom: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══ NAVBAR ══ -->
+<nav class="navbar navbar-expand-lg" id="mainNav">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <div class="brand-icon"><i class="bi bi-shield-lock-fill"></i></div>
+            Smart Digital Document Locker System
+        </a>
+
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" style="color:var(--text1)">
+            <i class="bi bi-list" style="font-size:22px"></i>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navMenu">
+            <ul class="navbar-nav mx-auto gap-1">
+                <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+                <li class="nav-item"><a class="nav-link" href="#how-it-works">How It Works</a></li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('admin_login') }}">
+                        <i class="bi bi-shield me-1"></i>Admin
+                    </a>
+                </li>
+            </ul>
+            <div class="d-flex gap-2 mt-3 mt-lg-0">
+                <a href="{{ url_for('login') }}" class="btn-nav-outline">
+                    <i class="bi bi-box-arrow-in-right"></i> Login
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- ══ HERO ══ -->
+<section id="home" class="hero">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-pill">
+                <span class="hero-pill-dot"></span>
+                AES-256 Encrypted · Bank-Level Security
+            </div>
+
+            <h1>
+                Secure Your Digital<br>
+                Documents with <span class="accent">Confidence</span>
+            </h1>
+
+            <p class="hero-sub">
+                Store, manage, and access your important documents in a secure digital vault.
+                Access anytime, anywhere — fully encrypted.
+            </p>
+
+            <div class="hero-btns">
+                <a href="{{ url_for('login') }}" class="btn-hero-primary">
+                    <i class="bi bi-rocket-takeoff"></i> Get Started Free
+                </a>
+                <a href="#features" class="btn-hero-ghost">
+                    <i class="bi bi-play-circle"></i> Learn More
+                </a>
+            </div>
+
+            <div class="hero-stats">
+                <div class="hs-item">
+                    <i class="bi bi-cloud-upload hs-icon blue"></i>
+                    <span class="hs-num">{{ documents_count }}+</span>
+                    <span class="hs-lbl">Documents</span>
+                </div>
+                <div class="hs-item">
+                    <i class="bi bi-people hs-icon green"></i>
+                    <span class="hs-num">{{ users_count }}+</span>
+                    <span class="hs-lbl">Active Users</span>
+                </div>
+                <div class="hs-item">
+                    <i class="bi bi-shield-check hs-icon purple"></i>
+                    <span class="hs-num">{{ uptime }}%</span>
+                    <span class="hs-lbl">Secure Uptime</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══ FEATURES ══ -->
+<section id="features">
+    <div class="container">
+        <div class="text-center mb-5">
+            <div class="sec-label"><i class="bi bi-stars"></i> Features</div>
+            <h2 class="sec-title">Powerful Security Features</h2>
+            <p class="sec-sub mx-auto">Everything you need to manage and protect your documents</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feat-card">
+                    <div class="feat-icon blue"><i class="bi bi-shield-lock"></i></div>
+                    <h5>Bank-Level Security</h5>
+                    <p>256-bit AES encryption ensures your documents are safe from unauthorized access at all times.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feat-card">
+                    <div class="feat-icon green"><i class="bi bi-cloud-arrow-up"></i></div>
+                    <h5>Easy Upload</h5>
+                    <p>Drag and drop interface makes uploading documents quick and effortless from any device.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feat-card">
+                    <div class="feat-icon purple"><i class="bi bi-search"></i></div>
+                    <h5>Smart Search</h5>
+                    <p>Find any document instantly with our powerful full-text search functionality.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feat-card">
+                    <div class="feat-icon amber"><i class="bi bi-tags"></i></div>
+                    <h5>Smart Categories</h5>
+                    <p>Organize documents with custom categories and tags for quick retrieval.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feat-card">
+                    <div class="feat-icon blue"><i class="bi bi-clock-history"></i></div>
+                    <h5>Version History</h5>
+                    <p>Track changes and restore previous versions of your important documents.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feat-card">
+                    <div class="feat-icon green"><i class="bi bi-phone"></i></div>
+                    <h5>Access Anywhere</h5>
+                    <p>Access your secure vault from any device — desktop, tablet, or mobile phone.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══ HOW IT WORKS ══ -->
+<section id="how-it-works">
+    <div class="container">
+        <div class="text-center mb-5">
+            <div class="sec-label"><i class="bi bi-diagram-3"></i> Process</div>
+            <h2 class="sec-title">How It Works</h2>
+            <p class="sec-sub mx-auto">Get started in just three simple steps</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="step-card">
+                    <div class="step-num">01</div>
+                    <h5>Create Account</h5>
+                    <p>Sign up for free and verify your email address to activate your secure vault.</p>
+                    <i class="bi bi-person-plus step-ico"></i>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="step-card">
+                    <div class="step-num">02</div>
+                    <h5>Upload Documents</h5>
+                    <p>Drag and drop your files or click to upload directly from your device.</p>
+                    <i class="bi bi-cloud-arrow-up step-ico"></i>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="step-card">
+                    <div class="step-num">03</div>
+                    <h5>Access Anywhere</h5>
+                    <p>Access your documents securely from any device, at any time, anywhere in the world.</p>
+                    <i class="bi bi-globe step-ico"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ══ FOOTER ══ -->
+<footer>
+    <div class="container">
+        <div class="row g-5">
+            <div class="col-lg-4">
+                <div class="foot-brand">
+                    <div class="foot-brand-icon"><i class="bi bi-shield-lock-fill"></i></div>
+                    Smart Digital  Locker
+                </div>
+                <p class="foot-desc">Secure digital document management system for individuals and businesses. Your data, protected always.</p>
+                <div class="social-row">
+                    <a href="https://www.facebook.com/" target="_blank" class="social-btn"><i class="bi bi-facebook"></i></a>
+                    <a href="https://twitter.com/" target="_blank" class="social-btn"><i class="bi bi-twitter-x"></i></a>
+                    <a href="https://www.linkedin.com/" target="_blank" class="social-btn"><i class="bi bi-linkedin"></i></a>
+                    <a href="https://github.com/" target="_blank" class="social-btn"><i class="bi bi-github"></i></a>
+                </div>
+            </div>
+
+            <div class="col-6 col-lg-2">
+                <div class="foot-head">Quick Links</div>
+                <ul class="foot-links">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#how-it-works">How It Works</a></li>
+                    <li><a href="{{ url_for('admin_login') }}">Admin Login</a></li>
+                </ul>
+            </div>
+
+            <div class="col-6 col-lg-2">
+                <div class="foot-head">Account</div>
+                <ul class="foot-links">
+                    <li><a href="{{ url_for('login') }}">Login page</a></li>
+                    <li><a href="{{ url_for('admin_login') }}">Admin Portal</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="foot-head">Contact Us</div>
+                <div class="foot-contact-item">
+                    <i class="bi bi-envelope"></i>
+                    <span>smartdigital@smartlocker.com</span>
+                </div>
+                <div class="foot-contact-item">
+                    <i class="bi bi-telephone"></i>
+                    <span>+91 9876543210</span>
+                </div>
+                <div class="foot-contact-item">
+                    <i class="bi bi-geo-alt"></i>
+                    <span>401, Smart Tower, Tech Park</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="foot-bottom">
+            <span>&copy; 2026 Smart Digital Document Locker System. All rights reserved.</span>
+            <div class="foot-enc">
+                <i class="bi bi-shield-check"></i>
+                {{ documents_count }} docs · {{ users_count }} users
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    var nav = document.getElementById('mainNav');
+    window.addEventListener('scroll', function() {
+        nav.classList.toggle('scrolled', window.scrollY > 40);
+    });
+</script>
+</body>
+</html>
